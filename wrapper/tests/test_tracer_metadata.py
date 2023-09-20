@@ -1,6 +1,6 @@
 import unittest
 import os
-import fv3gfs.wrapper
+import shield.wrapper
 from util import get_default_config, main
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -9,7 +9,7 @@ rundir = os.path.join(test_dir, "rundir")
 
 class TracerMetadataTests(unittest.TestCase):
     def test_tracer_index_is_one_based(self):
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         indexes = []
         for entry in data.values():
             self.assertIn("i_tracer", entry)
@@ -22,7 +22,7 @@ class TracerMetadataTests(unittest.TestCase):
         )  # test there are no duplicates
 
     def test_tracer_metadata_has_all_keys(self):
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         for name, metadata in data.items():
             with self.subTest(msg=name):
                 self.assertIn("units", metadata)
@@ -47,17 +47,18 @@ class TracerMetadataTests(unittest.TestCase):
             "snow_mixing_ratio",
             "graupel_mixing_ratio",
             "ozone_mixing_ratio",
-            "cloud_amount",
+            "cloud_fraction",
+            "turbulent_kinetic_energy"
         ]
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         self.assertEqual(set(data.keys()), set(tracer_names))
 
     def test_ozone_not_water(self):
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         self.assertFalse(data["ozone_mixing_ratio"]["is_water"])
 
     def test_specific_humidity_is_water(self):
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         self.assertTrue(data["specific_humidity"]["is_water"])
 
     def test_all_tracers_in_restart_names(self):
@@ -69,9 +70,10 @@ class TracerMetadataTests(unittest.TestCase):
             "snow_mixing_ratio",
             "graupel_mixing_ratio",
             "ozone_mixing_ratio",
-            "cloud_amount",
+            "cloud_fraction",
+            "turbulent_kinetic_energy"
         ]
-        restart_names = fv3gfs.wrapper.get_restart_names()
+        restart_names = shield.wrapper.get_restart_names()
         missing_names = set(tracer_names).difference(restart_names)
         self.assertEqual(len(missing_names), 0)
 

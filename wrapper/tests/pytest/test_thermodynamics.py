@@ -1,12 +1,12 @@
 import pace.util
 import numpy as np
 
-import fv3gfs.wrapper
+import shield.wrapper
 
 import pytest
 
 
-class MockFv3GFS:
+class MockSHiELD:
     def __init__(self):
         shape = [1, 1, 1]
         one = np.ones(shape, dtype=np.float32)
@@ -38,10 +38,10 @@ class MockFv3GFS:
 
 
 def test_set_state_mass_conserving_non_water():
-    mock = MockFv3GFS()
-    fv3gfs.wrapper.set_state_mass_conserving(
+    mock = MockSHiELD()
+    shield.wrapper.set_state_mass_conserving(
         {"air_temperature": pace.util.Quantity(mock.one, dims=mock.dims, units="K")},
-        fv3gfs=mock,
+        shield=mock,
         pressure="delp",
     )
 
@@ -49,24 +49,24 @@ def test_set_state_mass_conserving_non_water():
 
 
 def test_set_state_mass_conserving_cant_set_delp():
-    mock = MockFv3GFS()
+    mock = MockSHiELD()
     with pytest.raises(ValueError):
-        fv3gfs.wrapper.set_state_mass_conserving(
+        shield.wrapper.set_state_mass_conserving(
             {"delp": pace.util.Quantity(mock.one, dims=mock.dims, units="K")},
-            fv3gfs=mock,
+            shield=mock,
             pressure="delp",
         )
 
 
 def test_set_state_mass_conserving_water_added():
-    mock = MockFv3GFS()
-    fv3gfs.wrapper.set_state_mass_conserving(
+    mock = MockSHiELD()
+    shield.wrapper.set_state_mass_conserving(
         {
             "specific_humidity": pace.util.Quantity(
                 2 * mock.one, dims=mock.dims, units=""
             )
         },
-        fv3gfs=mock,
+        shield=mock,
         pressure="delp",
     )
     np.testing.assert_allclose(mock.state["delp"].view[:], 2)

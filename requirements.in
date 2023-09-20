@@ -1,0 +1,14 @@
+cftime>=1.2.1
+cython
+jinja2
+fv3config
+mpi4py>=3.0.3
+netCDF4>=1.4.2
+numpy>=1.16
+pace-util>=0.7.0
+pkgconfig
+pytest
+pytest-regtest
+pyyaml>=5
+xarray>=0.15.1
+wheel

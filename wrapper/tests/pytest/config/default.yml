@@ -11,9 +11,9 @@ diag_table:
     - {module_name: dynamics, field_name: zsurf, output_name: HGTsfc}
     name: atmos_static
     frequency: -1
-    frequency_units: hours
+    frequency_units: minutes
     time_axis_name: time
-    time_axis_units: hours
+    time_axis_units: minutes
   - field_configs:
     - {module_name: dynamics, field_name: grid_lont, output_name: lon}
     - {module_name: dynamics, field_name: grid_latt, output_name: lat}
@@ -65,17 +65,6 @@ diag_table:
     - {module_name: dynamics, field_name: ctz, output_name: HGTctp}
     - {module_name: dynamics, field_name: z500, output_name: z500}
     - {module_name: dynamics, field_name: cape, output_name: cape}
-    name: atmos_dt_atmos
-    frequency: 0
-    frequency_units: hours
-    time_axis_name: time
-    time_axis_units: hours
-  - field_configs:
-    - {module_name: dynamics, field_name: grid_lont, output_name: lon}
-    - {module_name: dynamics, field_name: grid_latt, output_name: lat}
-    - {module_name: dynamics, field_name: grid_lon, output_name: lonb}
-    - {module_name: dynamics, field_name: grid_lat, output_name: latb}
-    - {module_name: dynamics, field_name: area, output_name: area}
     - {module_name: dynamics, field_name: ucomp, output_name: ucomp}
     - {module_name: dynamics, field_name: vcomp, output_name: vcomp}
     - {module_name: dynamics, field_name: temp, output_name: temp}
@@ -91,12 +80,11 @@ diag_table:
     - {module_name: dynamics, field_name: rainwat, output_name: rainwat}
     - {module_name: dynamics, field_name: snowwat, output_name: snowwat}
     - {module_name: dynamics, field_name: graupel, output_name: graupel}
-    - {module_name: dynamics, field_name: delp_total, output_name: delp_total}
-    name: atmos_8xdaily
-    frequency: 3
-    frequency_units: hours
+    name: atmos_dt_atmos
+    frequency: 15
+    frequency_units: minutes
     time_axis_name: time
-    time_axis_units: hours
+    time_axis_units: minutes
   - field_configs:
     - {module_name: dynamics, field_name: grid_lont, output_name: lon}
     - {module_name: dynamics, field_name: grid_latt, output_name: lat}
@@ -139,17 +127,19 @@ diag_table:
     - {module_name: gfs_sfc, field_name: SOILT2, output_name: SOILT2}
     - {module_name: gfs_sfc, field_name: SOILT3, output_name: SOILT3}
     - {module_name: gfs_sfc, field_name: SOILT4, output_name: SOILT4}
-    - {module_name: gfs_phys, field_name: lowest_level_wind_speed, output_name: lowest_level_wind_speed}
     name: sfc_dt_atmos
     frequency: 0
-    frequency_units: hours
+    frequency_units: minutes
     time_axis_name: time
-    time_axis_units: hours
+    time_axis_units: minutes
 experiment_name: default
-forcing: "gs://vcm-fv3config/data/base_forcing/v1.1/"
-orographic_forcing: gs://vcm-fv3config/data/orographic_data/v1.0
-initial_conditions: gs://vcm-fv3config/data/initial_conditions/gfs_c12_example/v1.0 
+field_table: gs://vcm-fv3config/config/field_table/TKE-EDMF/v1.1/field_table
+forcing: gs://vcm-ml-experiments/spencerc/2023-09-13-SHiELD-forcing-data
+initial_conditions: gs://vcm-fv3config/data/initial_conditions/gfs_c12_example/v1.0
 namelist:
+  fms_affinity_nml:
+    affinity: false
+    debug_affinity: true
   amip_interp_nml:
     data_set: reynolds_oi
     date_out_of_range: climo
@@ -161,44 +151,22 @@ namelist:
     blocksize: 24
     chksum_debug: false
     dycore_only: false
-    fdiag: 0.0
-    fhmax: 1024.0
-    fhmaxhf: -1.0
-    fhout: 0.25
-    fhouthf: 0.0
-  cires_ugwp_nml:
-    knob_ugwp_azdir:
-    - 2
-    - 4
-    - 4
-    - 4
-    knob_ugwp_doaxyz: 1
-    knob_ugwp_doheat: 1
-    knob_ugwp_dokdis: 0
-    knob_ugwp_effac:
-    - 1
-    - 1
-    - 1
-    - 1
-    knob_ugwp_ndx4lh: 4
-    knob_ugwp_solver: 2
-    knob_ugwp_source:
-    - 1
-    - 1
-    - 1
-    - 0
-    knob_ugwp_stoch:
-    - 0
-    - 0
-    - 0
-    - 0
-    knob_ugwp_version: 0
-    knob_ugwp_wvspec:
-    - 1
-    - 32
-    - 32
-    - 32
-    launch_level: 55
+    fdiag: 0.25
+    first_time_step: false
+  cloud_diagnosis_nml:
+    beta: 1.22
+    ccn_l: 300.0
+    ccn_o: 100.0
+    liq_ice_combine: true
+    qi0_max: 0.0002
+    ql0_max: 0.002
+    qmin: 1.0e-12
+    reiflag: 1
+    reimax: 150.0
+    reimin: 10.0
+    rewflag: 1
+    rewmax: 10.0
+    rewmin: 5.0
   coupler_nml:
     atmos_nthreads: 1
     calendar: julian
@@ -212,13 +180,11 @@ namelist:
     days: 0
     dt_atmos: 900
     dt_ocean: 900
-    hours: 1
-    memuse_verbose: true
-    minutes: 0
+    hours: 0
+    minutes: 30
     months: 0
-    ncores_per_node: 32
     seconds: 0
-    use_hyper_thread: true
+    use_hyper_thread: false
   diag_manager_nml:
     prepend_date: false
   external_ic_nml:
@@ -242,7 +208,7 @@ namelist:
     consv_am: false
     consv_te: 1.0
     d2_bg: 0.0
-    d2_bg_k1: 0.16
+    d2_bg_k1: 0.15
     d2_bg_k2: 0.02
     d4_bg: 0.15
     d_con: 1.0
@@ -250,61 +216,59 @@ namelist:
     dddmp: 0.2
     delt_max: 0.002
     dnats: 1
-    do_sat_adj: true
     do_vort_damp: true
     dwind_2d: false
     external_ic: true
     fill: true
     fv_debug: false
-    fv_sg_adj: 900
+    fv_sg_adj: 600
     gfs_phil: false
-    hord_dp: 6
-    hord_mt: 6
-    hord_tm: 6
-    hord_tr: 8
-    hord_vt: 6
+    grid_type: 0
+    hord_dp: -5
+    hord_mt: 5
+    hord_tm: 5
+    hord_tr: -5
+    hord_vt: 5
     hydrostatic: false
     io_layout:
     - 1
     - 1
-    k_split: 1
+    k_split: 2
     ke_bg: 0.0
-    kord_mt: 10
-    kord_tm: -10
-    kord_tr: 10
-    kord_wz: 10
+    kord_mt: 9
+    kord_tm: -9
+    kord_tr: 9
+    kord_wz: 9
     layout:
     - 1
     - 1
     make_nh: true
     mountain: false
     n_split: 6
-    n_sponge: 4
+    n_sponge: 30
     na_init: 1
     ncep_ic: false
     nggps_ic: true
     no_dycore: false
-    nord: 2
+    nord: 3
     npx: 13
     npy: 13
     npz: 63
     ntiles: 6
-    nudge: false
     nudge_qv: true
     nwat: 6
     p_fac: 0.1
     phys_hydrostatic: false
-    print_freq: 3
-    range_warn: true
+    print_freq: 6
+    range_warn: false
     reset_eta: false
-    rf_cutoff: 800.0
+    rf_cutoff: 750.0
     rf_fast: false
     tau: 5.0
     use_hydro_pressure: false
-    vtdm4: 0.06
+    vtdm4: 0.03
     warm_start: false
     z_tracer: true
-  fv_grid_nml: {}
   gfdl_cloud_microphysics_nml:
     c_cracw: 0.8
     c_paut: 0.5
@@ -318,14 +282,13 @@ namelist:
     const_vs: false
     de_ice: false
     do_qa: true
-    do_sedi_heat: false
+    do_sedi_heat: true
     dw_land: 0.16
     dw_ocean: 0.1
-    fast_sat_adj: true
-    fix_negative: true
-    icloud_f: 1
-    mono_prof: true
-    mp_time: 450.0
+    fast_sat_adj: false
+    fix_negative: false
+    mono_prof: false
+    mp_time: 150.0
     prog_ccn: false
     qi0_crt: 8.0e-05
     qi_lim: 1.0
@@ -339,17 +302,62 @@ namelist:
     rh_inr: 0.3
     rh_ins: 0.3
     rthresh: 1.0e-05
-    sedi_transport: false
+    sedi_transport: true
     tau_g2v: 900.0
     tau_i2s: 1000.0
-    tau_l2v:
-    - 225.0
+    tau_l2v: 300.0
     tau_v2l: 150.0
     use_ccn: true
     use_ppm: false
+    vg_fac: 1.0
     vg_max: 12.0
+    vi_fac: 1.0
     vi_max: 1.0
+    vr_fac: 1.0
     vr_max: 12.0
+    vs_fac: 1.0
+    vs_max: 2.0
+    z_slope_ice: true
+    z_slope_liq: true
+  gfdl_mp_nml:
+    c_paut: 0.5
+    c_pgacs: 0.01
+    c_psaci: 0.05
+    ccn_l: 300.0
+    ccn_o: 100.0
+    const_vg: false
+    const_vi: false
+    const_vr: false
+    const_vs: false
+    do_qa: true
+    do_sedi_heat: true
+    dw_land: 0.16
+    dw_ocean: 0.1
+    fix_negative: false
+    icloud_f: 0
+    prog_ccn: false
+    qi0_crt: 8.0e-05
+    qi_lim: 1.0
+    ql_gen: 0.001
+    ql_mlt: 0.001
+    qs0_crt: 0.001
+    rad_graupel: true
+    rad_rain: true
+    rad_snow: true
+    rh_inc: 0.3
+    rh_inr: 0.3
+    rh_ins: 0.3
+    rthresh: 1.0e-05
+    tau_i2s: 1000.0
+    tau_l2v: 225.0
+    tau_v2l: 150.0
+    vg_fac: 1.0
+    vg_max: 12.0
+    vi_fac: 1.0
+    vi_max: 1.0
+    vr_fac: 1.0
+    vr_max: 12.0
+    vs_fac: 1.0
     vs_max: 2.0
     z_slope_ice: true
     z_slope_liq: true
@@ -358,22 +366,24 @@ namelist:
     cdmbgwd:
     - 3.5
     - 0.25
+    cloud_gfdl: false
     cnvcld: false
     cnvgwd: true
     debug: false
+    do_deep: true
+    do_ocean: true
     dspheat: true
     fhcyc: 24.0
     fhlwr: 3600.0
     fhswr: 3600.0
     fhzero: 0.25
-    hybedmf: true
+    hybedmf: false
     iaer: 111
     ialb: 1
     ico2: 2
     iems: 1
     imfdeepcnv: 2
     imfshalcnv: 2
-    imp_physics: 11
     isol: 2
     isot: 1
     isubc_lw: 2
@@ -392,12 +402,16 @@ namelist:
     swhtr: true
     trans_trac: true
     use_ufo: true
+    xkzm_h: 0.001
+    xkzm_m: 0.001
+    xkzminv: 1.0
+    ysupbl: true
+    zhao_mic: false
+  integ_phys_nml:
+    do_inline_mp: false
+    do_sat_adj: false
   interpolator_nml:
     interp_method: conserve_great_circle
-  nam_stochy:
-    lat_s: 96
-    lon_s: 192
-    ntrunc: 94
   namsfc:
     fabsl: 99999
     faisl: 99999
@@ -439,3 +453,19 @@ namelist:
     fvmnl: 99999
     fvmxl: 99999
     ldebug: false
+  ocean_nml:
+    do_mld_restore: true
+    end_lat: 30.0
+    eps_day: 10.0
+    gam: 0.2
+    mld_obs_ratio: 1.0
+    mld_option: obs
+    mld_restore_tscale: 2.0
+    ocean_option: MLM
+    restore_method: 2
+    sst_restore_tscale: 2.0
+    start_lat: -30.0
+    stress_ratio: 1.0
+    use_old_mlm: true
+    use_rain_flux: true
+orographic_forcing: gs://vcm-fv3config/data/orographic_data/v1.0

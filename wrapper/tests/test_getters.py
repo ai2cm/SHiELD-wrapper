@@ -1,12 +1,11 @@
 import unittest
 import os
 import numpy as np
-import fv3gfs.wrapper
+import shield.wrapper
 import pace.util
-from fv3gfs.wrapper._properties import (
+from shield.wrapper._properties import (
     DYNAMICS_PROPERTIES,
     PHYSICS_PROPERTIES,
-    OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES,
 )
 from mpi4py import MPI
 from util import get_current_config, get_default_config, generate_data_dict, main
@@ -14,18 +13,14 @@ from util import get_current_config, get_default_config, generate_data_dict, mai
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 MM_PER_M = 1000
-DEFAULT_PHYSICS_PROPERTIES = []
-for entry in PHYSICS_PROPERTIES:
-    if entry["name"] not in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
-        DEFAULT_PHYSICS_PROPERTIES.append(entry)
 
 
 class GetterTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(GetterTests, self).__init__(*args, **kwargs)
-        self.tracer_data = fv3gfs.wrapper.get_tracer_metadata()
+        self.tracer_data = shield.wrapper.get_tracer_metadata()
         self.dynamics_data = generate_data_dict(DYNAMICS_PROPERTIES)
-        self.physics_data = generate_data_dict(DEFAULT_PHYSICS_PROPERTIES)
+        self.physics_data = generate_data_dict(PHYSICS_PROPERTIES)
         self.mpi_comm = MPI.COMM_WORLD
 
     def setUp(self):
@@ -54,7 +49,7 @@ class GetterTests(unittest.TestCase):
 
     def test_air_temperatures_are_reasonable(self):
         """Test that air temperatures are numbers that look like air temperatures"""
-        state = fv3gfs.wrapper.get_state(names=["air_temperature"])
+        state = shield.wrapper.get_state(names=["air_temperature"])
         self.assertIn("air_temperature", state.keys())
         quantity = state["air_temperature"]
         self.assertIsInstance(quantity, pace.util.Quantity)
@@ -65,7 +60,7 @@ class GetterTests(unittest.TestCase):
 
     def test_get_surface_geopotential(self):
         """This is a special test because it's the only 2D dynamics variable."""
-        state = fv3gfs.wrapper.get_state(names=["surface_geopotential"])
+        state = shield.wrapper.get_state(names=["surface_geopotential"])
         self.assertIn("surface_geopotential", state.keys())
         quantity = state["surface_geopotential"]
         self.assertIsInstance(quantity, pace.util.Quantity)
@@ -74,21 +69,21 @@ class GetterTests(unittest.TestCase):
 
     def test_get_soil_temperature(self):
         """This is a special test because it uses a different vertical grid (soil levels)."""
-        state = fv3gfs.wrapper.get_state(names=["soil_temperature"])
+        state = shield.wrapper.get_state(names=["soil_temperature"])
         self.assertIn("soil_temperature", state.keys())
         quantity = state["soil_temperature"]
         self.assertIsInstance(quantity, pace.util.Quantity)
 
         self.assertEqual(quantity.units, "degK")
 
-    def test_get_cloud_amount(self):
+    def test_get_cloud_fraction(self):
         """Included because this caused a segfault at some point, as a diagnostic tracer."""
-        self._get_names_helper(["cloud_amount"])
+        self._get_names_helper(["cloud_fraction"])
 
     def test_get_surface_precipitation_rate(self):
         """Special test since this quantity is not in physics_properties.json file"""
         self._get_names_helper(["surface_precipitation_rate"])
-        state = fv3gfs.wrapper.get_state(
+        state = shield.wrapper.get_state(
             names=["total_precipitation", "surface_precipitation_rate"]
         )
         total_precip = state["total_precipitation"]
@@ -128,7 +123,7 @@ class GetterTests(unittest.TestCase):
         self._get_names_helper(self.tracer_data.keys())
 
     def test_get_restart_names(self):
-        restart_names = fv3gfs.wrapper.get_restart_names()
+        restart_names = shield.wrapper.get_restart_names()
         restart_names.remove("time")
         self._get_names_helper(restart_names)
 
@@ -148,7 +143,7 @@ class GetterTests(unittest.TestCase):
         self._get_names_helper(all_name_list[::3])
 
     def _get_names_helper(self, name_list):
-        state = fv3gfs.wrapper.get_state(names=name_list)
+        state = shield.wrapper.get_state(names=name_list)
         for name, value in state.items():
             with self.subTest(name):
                 self.assertIsInstance(name, str)
@@ -158,19 +153,9 @@ class GetterTests(unittest.TestCase):
                 self.assertIn(name, state)
         self.assertEqual(len(name_list), len(state.keys()))
 
-    def _get_unallocated_name_helper(self, name):
-        with self.assertRaisesRegex(pace.util.InvalidQuantityError, "Overriding"):
-            fv3gfs.wrapper.get_state(names=[name])
-
-    def test_unallocated_physics_properties(self):
-        for name in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
-            with self.subTest(name):
-                self._get_unallocated_name_helper(name)
-
-
 class TracerMetadataTests(unittest.TestCase):
     def test_tracer_index_is_one_based(self):
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         indexes = []
         for entry in data.values():
             self.assertIn("i_tracer", entry)
@@ -183,7 +168,7 @@ class TracerMetadataTests(unittest.TestCase):
         )  # test there are no duplicates
 
     def test_tracer_metadata_has_all_keys(self):
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         for name, metadata in data.items():
             with self.subTest(msg=name):
                 self.assertIn("units", metadata)
@@ -202,9 +187,10 @@ class TracerMetadataTests(unittest.TestCase):
             "snow_mixing_ratio",
             "graupel_mixing_ratio",
             "ozone_mixing_ratio",
-            "cloud_amount",
+            "cloud_fraction",
+            "turbulent_kinetic_energy",
         ]
-        data = fv3gfs.wrapper.get_tracer_metadata()
+        data = shield.wrapper.get_tracer_metadata()
         self.assertEqual(set(data.keys()), set(tracer_names))
 
 

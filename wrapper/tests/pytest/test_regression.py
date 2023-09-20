@@ -1,101 +1,91 @@
+import hashlib
 import os
 import subprocess
-import pytest
+import typing
+
 import fv3config
-import hashlib
+import pytest
+
+from pathlib import Path
 
 
-TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-CONFIG_DIR = os.path.join(TEST_DIR, "config")
-CONFIG_PARAMS = [
-    pytest.param("default.yml", marks=pytest.mark.basic),
-    pytest.param("emulation.yml", marks=pytest.mark.emulation),
-    pytest.param("model-level-coarse-graining.yml", marks=pytest.mark.coarse),
-    pytest.param("pressure-level-coarse-graining.yml", marks=pytest.mark.coarse),
-    pytest.param("pressure-level-extrapolate-coarse-graining.yml", marks=pytest.mark.coarse),
-    pytest.param("blended-area-weighted-coarse-graining.yml", marks=pytest.mark.coarse),
-    "restart.yml",
-    "baroclinic.yml"
-]
+TEST_DIR = Path(__file__).parent
+CONFIG_DIR = TEST_DIR / "config"
+EXECUTABLE = Path("/SHiELD/SHiELD_build/Build/bin/SHiELD_nh.prod.64bit.gnu.x")
 
 
-@pytest.fixture(params=CONFIG_PARAMS)
-def config(request):
-    config_filename = os.path.join(CONFIG_DIR, request.param)
-    with open(config_filename, "r") as config_file:
-        return fv3config.load(config_file)
+def get_config(filename):
+    config_filename = CONFIG_DIR / filename
+    with open(config_filename, "r") as f:
+        return fv3config.load(f)
 
 
-def md5_from_dir(dir_):
-    md5s = {}
-    for root, dirs, files in os.walk(str(dir_)):
-        for file in files:
-            with open(os.path.join(root, file), "rb") as f:
-                md5 = hashlib.md5()
-                while True:
-                    buf = f.read(2048)
-                    if not buf:
-                        break
-                    md5.update(buf)
-
-            relpath_to_root = os.path.relpath(root, start=dir_)
-            md5s[os.path.join(relpath_to_root, file)] = md5.hexdigest()
-    return md5s
+def checksum_file(path: Path) -> str:
+    sum = hashlib.md5()
+    BUFFER_SIZE = 1024 * 1024
+    with open(path, "rb") as f:
+        while True:
+            buf = f.read(BUFFER_SIZE)
+            if not buf:
+                break
+            sum.update(buf)
+    return sum.hexdigest()
 
 
-def md5_from_dir_only_nc(dir_):
-    return {
-        file: hash for file, hash in md5_from_dir(dir_).items() if file.endswith(".nc")
-    }
+def get_rundir_netcdfs(rundir: Path) -> typing.List[Path]:
+    restart_directory = rundir / "RESTART"
+    diagnostics_files = sorted(rundir.glob("*.nc"))
+    restart_files = sorted(restart_directory.glob("*.nc"))
+    return diagnostics_files + restart_files    
 
 
-def test_md5_from_dir(tmpdir):
-    tmpdir.join("a").open("w").write("hello")
-    tmpdir.join("b").open("w").write("world")
+def checksum_rundir_to_dict(rundir: Path) -> typing.Dict[str, str]:
+    rundir_netcdfs = get_rundir_netcdfs(rundir)
+    return {file.name: checksum_file(file) for file in rundir_netcdfs}
+        
 
-    orig_md5 = md5_from_dir(tmpdir)
-    assert orig_md5 == md5_from_dir(tmpdir)
-
-    tmpdir.join("b").open("w").write("world updated")
-    assert orig_md5 != md5_from_dir(tmpdir)
-
-
-def test_md5_from_dir_subdirs(tmpdir):
-    tmpdir.mkdir("subdir").join("a").open("w").write("hello")
-    md5s = md5_from_dir(tmpdir)
-    assert "subdir/a" in md5s
+def checksum_rundir_to_file(rundir: Path, file: Path):
+    """checksum rundir storing output in file"""
+    rundir_netcdfs = get_rundir_netcdfs(rundir)
+    for path in rundir_netcdfs:
+        print(path, checksum_file(path), file=file)
 
 
-def test_fv3_wrapper_regression(regtest, tmpdir, config):
-    fv3_rundir = tmpdir.join("fv3")
-    wrapper_rundir = tmpdir.join("wrapper")
-
-    run_fv3(config, fv3_rundir)
-    run_wrapper(config, wrapper_rundir)
-
-    assert md5_from_dir_only_nc(fv3_rundir) == md5_from_dir_only_nc(wrapper_rundir)
-
-    # just make sure there are some outputs
-    assert len(md5_from_dir_only_nc(fv3_rundir)) > 0
-
-    # regression test the wrapper checksums
-    # update by running tests with 'pytest --regtest-reset'
-    md5s_wrapper = md5_from_dir_only_nc(wrapper_rundir)
-    for key in sorted(md5s_wrapper):
-        print(key)
-        print(key, md5s_wrapper[key], file=regtest)
-
-
-def run_fv3(config, run_dir):
-    fv3config.write_run_directory(config, str(run_dir))
-    subprocess.check_call(
-        ["mpirun", "-n", "6", "fv3.exe"], cwd=run_dir,
-    )
+def _run_simulation(config: dict, rundir: Path, command: typing.List[str]):
+    fv3config.write_run_directory(config, rundir)
+    n_processes = fv3config.config.get_n_processes(config)
+    command = ["mpirun", "-n", str(n_processes)] + command
+    completed_process = subprocess.run(command, cwd=rundir, capture_output=True)
+    if completed_process.returncode != 0:
+        print("Tail of Stderr:")
+        print(completed_process.stderr[-2000:].decode())
+        print("Tail of Stdout:")
+        print(completed_process.stdout[-2000:].decode())
+        pytest.fail()
+    return completed_process
+    
+        
+def run_fortran_executable(config: dict, rundir: Path):
+    command = [EXECUTABLE.absolute().as_posix()]
+    return _run_simulation(config, rundir, command)
 
 
-def run_wrapper(config, run_dir):
-    fv3config.write_run_directory(config, str(run_dir))
-    subprocess.check_call(
-        ["mpirun", "-n", "6", "python3", "-m", "mpi4py", "-m", "fv3gfs.wrapper.run"],
-        cwd=run_dir,
-    )
+def run_python_wrapper(config: dict, rundir: Path):
+    command = ["python3", "-m", "mpi4py", "-m", "shield.wrapper.run"]
+    return _run_simulation(config, rundir, command)
+    
+
+@pytest.mark.parametrize("config_filename", ["default.yml"])
+def test_regression(config_filename: str, tmp_path: Path, regtest):
+    config = get_config(config_filename)
+    rundir_fortran = tmp_path / "rundir-fortran"
+    rundir_wrapper = tmp_path / "rundir-wrapper"
+
+    run_fortran_executable(config, rundir_fortran)
+    run_python_wrapper(config, rundir_wrapper)
+
+    checksums_fortran = checksum_rundir_to_dict(rundir_fortran)
+    checksums_wrapper = checksum_rundir_to_dict(rundir_wrapper) 
+    
+    assert checksums_wrapper == checksums_fortran
+    checksum_rundir_to_file(rundir_wrapper, file=regtest)

@@ -1,6 +1,6 @@
 module flagstruct_data_mod
 
-use atmosphere_mod, only: Atm, mytile
+use atmosphere_mod, only: Atm, mygrid
 use atmos_model_mod, only: IPD_Control
 use fv_nwp_nudge_mod, only: do_adiabatic_init
 use iso_c_binding
@@ -19,9 +19,9 @@ contains
     subroutine get_{{ item.fortran_name }}({{ item.fortran_name }}_out) bind(c)
         {{ item.type_fortran }}({{ item.type_c }}), intent(out) :: {{ item.fortran_name }}_out
         {% if item.location == "flagstruct" %}
-        {{ item.fortran_name }}_out = Atm(mytile)%flagstruct%{{ item.fortran_name }}
+        {{ item.fortran_name }}_out = Atm(mygrid)%flagstruct%{{ item.fortran_name }}
         {% elif item.location == "Atm" %}
-        {{ item.fortran_name }}_out = Atm(mytile)%{{ item.fortran_name }}
+        {{ item.fortran_name }}_out = Atm(mygrid)%{{ item.fortran_name }}
         {% elif item.location == "IPD_Control" %}
         {{ item.fortran_name }}_out = IPD_Control%{{ item.fortran_name }}
         {% endif %}

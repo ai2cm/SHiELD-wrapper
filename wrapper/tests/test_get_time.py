@@ -14,7 +14,7 @@ import unittest
 import os
 import cftime
 from datetime import timedelta
-import fv3gfs.wrapper
+import shield.wrapper
 from mpi4py import MPI
 from util import get_default_config, main
 
@@ -41,7 +41,7 @@ class GetTimeCalendarTests(unittest.TestCase):
         self.mpi_comm.barrier()
 
     def test_get_time(self):
-        state = fv3gfs.wrapper.get_state(names=["time"])
+        state = shield.wrapper.get_state(names=["time"])
         assert isinstance(state["time"], self.DATE_TYPE)
         
         
@@ -61,14 +61,14 @@ class GetTimeAdvancesTests(unittest.TestCase):
         self.mpi_comm.barrier()
            
     def test_get_time_advances(self):
-        fv3gfs.wrapper.step_dynamics()
-        state = fv3gfs.wrapper.get_state(names=["time"])
+        shield.wrapper.step_dynamics()
+        state = shield.wrapper.get_state(names=["time"])
         assert state["time"] == self.INIT_TIME
-        fv3gfs.wrapper.compute_physics()
-        state = fv3gfs.wrapper.get_state(names=["time"])
+        shield.wrapper.compute_physics()
+        state = shield.wrapper.get_state(names=["time"])
         assert state["time"] == self.INIT_TIME
-        fv3gfs.wrapper.apply_physics()
-        state = fv3gfs.wrapper.get_state(names=["time"])
+        shield.wrapper.apply_physics()
+        state = shield.wrapper.get_state(names=["time"])
         one_timestep_in = self.INIT_TIME + timedelta(seconds=self.TIMESTEP_SECONDS)
         assert state["time"] == one_timestep_in
 

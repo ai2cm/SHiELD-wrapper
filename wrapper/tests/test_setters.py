@@ -3,11 +3,10 @@ import os
 import sys
 from copy import deepcopy
 import numpy as np
-import fv3gfs.wrapper
-from fv3gfs.wrapper._properties import (
+import shield.wrapper
+from shield.wrapper._properties import (
     DYNAMICS_PROPERTIES,
-    PHYSICS_PROPERTIES,
-    OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES,
+    PHYSICS_PROPERTIES
 )
 import pace.util
 from mpi4py import MPI
@@ -21,21 +20,14 @@ from util import (
 
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_PHYSICS_PROPERTIES = []
-for entry in PHYSICS_PROPERTIES:
-    if entry["name"] not in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
-        DEFAULT_PHYSICS_PROPERTIES.append(entry)
 
 
 class SetterTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(SetterTests, self).__init__(*args, **kwargs)
-        self.tracer_data = fv3gfs.wrapper.get_tracer_metadata()
+        self.tracer_data = shield.wrapper.get_tracer_metadata()
         self.dynamics_data = generate_data_dict(DYNAMICS_PROPERTIES)
-        if fv3gfs.wrapper.flags.override_surface_radiative_fluxes:
-            self.physics_data = generate_data_dict(PHYSICS_PROPERTIES)
-        else:
-            self.physics_data = generate_data_dict(DEFAULT_PHYSICS_PROPERTIES)
+        self.physics_data = generate_data_dict(PHYSICS_PROPERTIES)
 
     def setUp(self):
         pass
@@ -58,9 +50,9 @@ class SetterTests(unittest.TestCase):
         ]:
             self.assertIn(name, self.physics_data.keys())
 
-    def test_set_then_get_cloud_amount(self):
+    def test_set_then_get_cloud_fraction(self):
         """Included because this is the last diagnostic tracer in memory"""
-        self._set_names_helper(["cloud_amount"])
+        self._set_names_helper(["cloud_fraction"])
 
     def test_dynamics_names_one_at_a_time(self):
         for name in self.dynamics_data.keys():
@@ -121,7 +113,7 @@ class SetterTests(unittest.TestCase):
 
     def test_set_non_existent_quantity(self):
         with self.assertRaises(ValueError):
-            fv3gfs.wrapper.set_state(
+            shield.wrapper.set_state(
                 {
                     "non_quantity": pace.util.Quantity(
                         np.array([0.0]), dims=["dim1"], units=""
@@ -135,7 +127,7 @@ class SetterTests(unittest.TestCase):
 
     def _set_all_names_at_once_helper(self, name_list):
         replace_state = replace_state_with_random_values(name_list)
-        new_state = fv3gfs.wrapper.get_state(names=name_list)
+        new_state = shield.wrapper.get_state(names=name_list)
         self._check_gotten_state(new_state, name_list)
         for name, new_quantity in new_state.items():
             with self.subTest(name):
@@ -143,7 +135,7 @@ class SetterTests(unittest.TestCase):
                 self.assert_values_equal(new_quantity, replace_quantity)
 
     def _set_names_one_at_a_time_helper(self, name_list, input_modifier=None):
-        old_state = fv3gfs.wrapper.get_state(names=name_list)
+        old_state = shield.wrapper.get_state(names=name_list)
         self._check_gotten_state(old_state, name_list)
         for replace_name in name_list:
             with self.subTest(replace_name):
@@ -155,8 +147,8 @@ class SetterTests(unittest.TestCase):
                     set_quantity = target_quantity
                 replace_state = {replace_name: set_quantity}
                 target_state = {replace_name: target_quantity}
-                fv3gfs.wrapper.set_state(replace_state)
-                new_state = fv3gfs.wrapper.get_state(names=name_list)
+                shield.wrapper.set_state(replace_state)
+                new_state = shield.wrapper.get_state(names=name_list)
                 self._check_gotten_state(new_state, name_list)
                 for name, new_quantity in new_state.items():
                     if name == replace_name:
@@ -182,62 +174,24 @@ class SetterTests(unittest.TestCase):
     def assert_values_equal(self, quantity1, quantity2):
         self.assertTrue(quantity1.np.all(quantity1.view[:] == quantity2.view[:]))
 
-    def _set_unallocated_override_for_radiative_surface_flux(self, name):
-        config = get_current_config()
-        sizer = pace.util.SubtileGridSizer.from_namelist(config["namelist"])
-        factory = pace.util.QuantityFactory(sizer, np)
-        quantity = factory.zeros(["x", "y"], units="W/m**2")
-        with self.assertRaisesRegex(pace.util.InvalidQuantityError, "Overriding"):
-            fv3gfs.wrapper.set_state({name: quantity})
-
-    def test_set_unallocated_override_for_radiative_surface_flux(self):
-        if fv3gfs.wrapper.flags.override_surface_radiative_fluxes:
-            self.skipTest("Memory is allocated for the overriding fluxes in this case.")
-        for name in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
-            with self.subTest(name):
-                self._set_unallocated_override_for_radiative_surface_flux(name)
-
     def test_set_surface_precipitation_rate(self):
         """Special test since this quantity is not in physics_properties.json file"""
-        state = fv3gfs.wrapper.get_state(
+        state = shield.wrapper.get_state(
             names=["total_precipitation", "surface_precipitation_rate"]
         )
         total_precip_old = state["total_precipitation"]
         precip_rate_new = state["surface_precipitation_rate"]
         precip_rate_new.view[:] = 2 * precip_rate_new.view[:]
         precip_rate_new_copy = deepcopy(precip_rate_new)
-        fv3gfs.wrapper.set_state({"surface_precipitation_rate": precip_rate_new})
+        shield.wrapper.set_state({"surface_precipitation_rate": precip_rate_new})
         np.testing.assert_equal(precip_rate_new.view[:], precip_rate_new_copy.view[:])
-        state_new = fv3gfs.wrapper.get_state(["total_precipitation"])
+        state_new = shield.wrapper.get_state(["total_precipitation"])
         total_precip_new = state_new["total_precipitation"]
         np.testing.assert_allclose(
             2 * total_precip_old.view[:], total_precip_new.view[:]
         )
 
 
-def get_override_surface_radiative_fluxes():
-    """A crude way of parameterizing the setter tests for different values of
-    gfs_physics_nml.override_surface_radiative_fluxes.
-
-    See https://stackoverflow.com/questions/11380413/python-unittest-passing-arguments.
-    """
-    if len(sys.argv) != 2:
-        raise ValueError(
-            "test_setters.py requires a single argument "
-            "be passed through the command line, indicating the value of "
-            "the gfs_physics_nml.override_surface_radiative_fluxes flag "
-            "('true' or 'false')."
-        )
-    override_surface_radiative_fluxes = sys.argv.pop().lower()
-
-    # Convert string argument to bool.
-    return override_surface_radiative_fluxes == "true"
-
-
 if __name__ == "__main__":
     config = get_default_config()
-    override_surface_radiative_fluxes = get_override_surface_radiative_fluxes()
-    config["namelist"]["gfs_physics_nml"][
-        "override_surface_radiative_fluxes"
-    ] = override_surface_radiative_fluxes
     main(test_dir, config)

@@ -1,103 +1,61 @@
 SHELL = /bin/sh
 
-CC ?= gcc
-MPI ?= mpich
+SHIELD_BUILD = /SHiELD/SHiELD_build
+include $(SHIELD_BUILD)/site/gnu.mk
 
-.PHONY: build clean clean-test clean-pyc clean-build clean-examples examples test coverage docs help
-.DEFAULT_GOAL := help
+FC ?= mpif90
+CC ?= mpicc
+CXX ?= mpicxx
+LD ?= mpif90
 
-define BROWSER_PYSCRIPT
-import os, webbrowser, sys
+ARTIFACTS=$(SHIELD_BUILD)/Build/exec/shield_wrapper_nh.prod.64bit.gnu
+FMS_64BIT=$(SHIELD_BUILD)/Build/libFMS/gnu/64bit
+FFLAGS += -I$(ARTIFACTS) -I$(FMS_64BIT)
+MPI_FLAGS=`$(FC) -show | sed 's/\(-I[^ ]*\|^[^ ]*\)//g'`
+NCEPLIBS = -L$(SHIELD_BUILD)/Build/nceplibs/gnu -lbacio  -lsp_d  -lw3emc_d  -lw3nco_d
 
-try:
-	from urllib import pathname2url
-except:
-	from urllib.request import pathname2url
+TEMPLATES_RELATIVE = dynamics_data.F90 flagstruct_data.F90 physics_data.F90 _wrapper.pyx
+TEMPLATES_IN = $(addprefix templates/,$(TEMPLATES_RELATIVE))
+TEMPLATES_OUT = $(addprefix lib/,$(TEMPLATES_RELATIVE))
+WRAPPER_OBJECTS=$(TEMPLATES_OUT:.F90=.o) lib/coupler_lib.o
 
-webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
-endef
-export BROWSER_PYSCRIPT
+PROPERTIES_FILES = \
+	shield/wrapper/dynamics_properties.json \
+	shield/wrapper/flagstruct_properties.json \
+	shield/wrapper/physics_properties.json
 
-define PRINT_HELP_PYSCRIPT
-import re, sys
+SETUP_PY_LIBS = -L$(ARTIFACTS) \
+                -L$(FMS_64BIT) \
+                -lfv3 \
+                -lFMS \
+                -lgfs \
+                $(NCEPLIBS) \
+                $(LDFLAGS) \
+                $(MPI_FLAGS) \
+                -lmvec \
+                -lm
 
-for line in sys.stdin:
-	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
-	if match:
-		target, help = match.groups()
-		print("%-20s %s" % (target, help))
-endef
-export PRINT_HELP_PYSCRIPT
+$(TEMPLATES_OUT): $(TEMPLATES_IN) $(PROPERTIES_FILES)
+	# fill_templates.py needs to be run in the same directory as the outputs
+	cd lib && python3 ../fill_templates.py $(TEMPLATES_RELATIVE)
 
-BROWSER := python3 -c "$$BROWSER_PYSCRIPT"
+build:$(WRAPPER_OBJECTS)
+	SETUP_PY_LIBS="$(SETUP_PY_LIBS)" python3 setup.py build_ext --inplace
+	SETUP_PY_LIBS="$(SETUP_PY_LIBS)" python3 setup.py bdist_wheel
 
-help:
-	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+install:
+	SETUP_PY_LIBS="$(SETUP_PY_LIBS)" python3 setup.py install
 
-clean: clean-build clean-pyc clean-test clean-lib clean-examples ## remove all build, test, coverage and Python artifacts
+# Specify dependency structure of the wrapper object files
+lib/physics_data.o: lib/physics_data.F90 lib/dynamics_data.o 
+lib/coupler_lib.o: lib/coupler_lib.F90 lib/dynamics_data.o
+lib/flagstruct_data.o: lib/flagstruct_data.F90
+lib/dynamics_data.o: lib/dynamics_data.F90
 
-clean-build: ## remove build artifacts
-	rm -fr build/
-	rm -fr dist/
-	rm -fr .eggs/
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.so' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+test:
+	pytest -vv tests/test_all_mpi_requiring.py
+	pytest -vv tests/pytest
 
-clean-pyc: ## remove Python file artifacts
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
-	find . -name '__pycache__' -exec rm -fr {} +
-
-clean-test: ## remove test and coverage artifacts
-	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
-	rm -fr .pytest_cache
-	rm -fr tests/pytest/output/*
-
-clean-lib:
-	$(MAKE) -C lib clean
-
-examples:
-	$(MAKE) -C examples/runfiles
-
-public_examples:
-	$(MAKE) -C examples/runfiles public_examples
-
-clean-examples:
-	$(MAKE) -C examples/runfiles clean
-
-test: ## run tests quickly with the default Python
-	pytest -v tests/pytest
-	pytest -v tests/test_all_mpi_requiring.py
-
-test_basic:
-	pytest -v tests/pytest -m basic
-
-test_coarse_graining:
-	pytest -v tests/pytest -m coarse
-
-test_emulation:
-	pytest -v tests/pytest -m emulation
-
-coverage: ## check code coverage quickly with the default Python
-	coverage run --source fv3gfs setup.py test
-	coverage report -m
-	coverage html
-	$(BROWSER) htmlcov/index.html
-
-docs: ## generate Sphinx HTML documentation, including API docs
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
-	$(BROWSER) docs/_build/html/index.html
-
-servedocs: docs ## compile the docs watching for changes
-	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
-
-release: dist ## package and upload a release
-	twine upload dist/*
-
-install: clean ## install the package to the active Python's site-packages
-	python3 setup.py install
+test_regtest_reset:
+	pytest -vv tests/test_all_mpi_requiring.py
+	pytest -vv tests/pytest --regtest-reset

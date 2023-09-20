@@ -2,7 +2,7 @@ import unittest
 import os
 from mpi4py import MPI
 import cftime
-import fv3gfs.wrapper
+import shield.wrapper
 from util import get_from_restarts_config, main
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,10 +26,10 @@ class GetInitializationTimeTests(unittest.TestCase):
 
     def test_get_initialization_time(self):
         initialization_time = (
-            fv3gfs.wrapper.get_state(names=["initialization_time"])
+            shield.wrapper.get_state(names=["initialization_time"])
             ["initialization_time"]
         )
-        current_time = fv3gfs.wrapper.get_state(names=["time"])["time"]
+        current_time = shield.wrapper.get_state(names=["time"])["time"]
         assert initialization_time == self.RUN_INITIALIZATION_TIME
         assert current_time == self.SEGMENT_START_TIME
         

@@ -11,7 +11,7 @@ from Cython.Build import cythonize
 # This line only needed if building with NumPy in Cython file.
 from numpy import get_include
 
-PACKAGE_VERSION = "0.6.0"
+PACKAGE_VERSION = "0.1.0"
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -21,10 +21,10 @@ class BuildDirectoryError(Exception):
 
 
 relative_wrapper_build_filenames = [
-    "lib/coupler_lib.o",
-    "lib/physics_data.o",
-    "lib/dynamics_data.o",
-    "lib/flagstruct_data.o",
+    "coupler_lib.o",
+    "physics_data.o",
+    "dynamics_data.o",
+    "flagstruct_data.o",
 ]
 
 wrapper_build_filenames = []
@@ -47,16 +47,9 @@ requirements = [
 
 test_requirements = []
 
-with open("README.md") as readme_file:
-    readme = readme_file.read()
-
-with open("HISTORY.md", "r", encoding="utf-8") as history_file:
-    history = history_file.read()
-
-
 ext_modules = [
     Extension(  # module name:
-        "fv3gfs.wrapper._wrapper",
+        "shield.wrapper._wrapper",
         # source file:
         ["lib/_wrapper.pyx"],
         include_dirs=[get_include()],
@@ -65,8 +58,7 @@ ext_modules = [
 ]
 
 setup(
-    author="Vulcan Technologies LLC",
-    author_email="jeremym@vulcan.com",
+    author="Allen Institute for Artificial Intelligence",
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
@@ -77,21 +69,24 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     install_requires=requirements,
     tests_require=test_requirements,
     extras_require={"examples": ["sklearn_json"]},
-    name="fv3gfs-wrapper",
+    name="shield-wrapper",
     license="BSD license",
-    long_description=readme + "\n\n" + history,
     cmdclass={"build_ext": build_ext},
-    packages=find_namespace_packages(include=["fv3gfs.*"]),
-    package_data={"fv3gfs.wrapper": ["*.json"]},
+    packages=find_namespace_packages(include=["shield.*"]),
+    package_data={"shield.wrapper": ["*.json"]},
     # Needed if building with NumPy.
     # This includes the NumPy headers when compiling.
     include_dirs=[get_include()],
     ext_modules=cythonize(ext_modules),
-    url="https://github.com/VulcanClimateModeling/fv3gfs-wrapper",
+    url="https://github.com/ai2cm/shield-wrapper",
     version=PACKAGE_VERSION,
     zip_safe=False,
 )

@@ -22,17 +22,12 @@ all_templates = (
     "flagstruct_data.F90",
 )
 SETUP_DIR = os.path.dirname(os.path.abspath(__file__))
-PROPERTIES_DIR = os.path.join(SETUP_DIR, "fv3gfs/wrapper")
+PROPERTIES_DIR = os.path.join(SETUP_DIR, "shield/wrapper")
 FORTRAN_TO_C_AND_CYTHON_TYPES = {
     "integer": {"type_c": "c_int", "type_cython": "int"},
     "real": {"type_c": "c_double", "type_cython": "REAL_t"},
     "logical": {"type_c": "c_int", "type_cython": "bint"},
 }
-OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES = [
-    "override_for_time_adjusted_total_sky_downward_longwave_flux_at_surface",
-    "override_for_time_adjusted_total_sky_downward_shortwave_flux_at_surface",
-    "override_for_time_adjusted_total_sky_net_shortwave_flux_at_surface",
-]
 
 
 def get_dim_range_string(dim_list):
@@ -103,7 +98,6 @@ if __name__ == "__main__":
             physics_3d_properties=physics_3d_properties,
             dynamics_properties=dynamics_properties,
             flagstruct_properties=flagstruct_properties,
-            overriding_fluxes=OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES,
         )
         with open(out_filename, "w") as f:
             f.write(result)

@@ -9,7 +9,7 @@ import unittest
 import shutil
 import numpy as np
 import fv3config
-import fv3gfs.wrapper
+import shield.wrapper
 from copy import deepcopy
 from mpi4py import MPI
 
@@ -90,7 +90,7 @@ def main(test_dir, config):
     os.chdir(rundir)
     try:
         with redirect_stdout(os.devnull):
-            fv3gfs.wrapper.initialize()
+            shield.wrapper.initialize()
             MPI.COMM_WORLD.barrier()
         if rank != 0:
             kwargs = {"verbosity": 0}
@@ -104,13 +104,13 @@ def main(test_dir, config):
 
 
 def get_default_config():
-    with open(os.path.join(base_dir, "default_config.yml"), "r") as f:
-        return yaml.safe_load(f)
+    with open(os.path.join(base_dir, "pytest", "config", "default.yml"), "r") as f:
+        return fv3config.load(f)
     
     
 def get_from_restarts_config():
-    with open(os.path.join(base_dir, "from_restarts_config.yml"), "r") as f:
-        return yaml.safe_load(f)
+    with open(os.path.join(base_dir, "pytest", "config", "restart.yml"), "r") as f:
+        return fv3config.load(f)
     
 
 def get_current_config():
@@ -123,13 +123,13 @@ def generate_data_dict(properties):
 
 
 def replace_state_with_random_values(names):
-    old_state = fv3gfs.wrapper.get_state(names=names)
+    old_state = shield.wrapper.get_state(names=names)
     replace_state = deepcopy(old_state)
     for name, quantity in replace_state.items():
         quantity.view[:] = np.random.uniform(size=quantity.extent)
-    fv3gfs.wrapper.set_state(replace_state)
+    shield.wrapper.set_state(replace_state)
     return replace_state
 
 
 def get_state_single_variable(name):
-    return fv3gfs.wrapper.get_state([name])[name].view[:]
+    return shield.wrapper.get_state([name])[name].view[:]

@@ -1,6 +1,6 @@
 module physics_data_mod
 
-use atmosphere_mod, only: Atm, mytile
+use atmosphere_mod, only: Atm, mygrid
 use tracer_manager_mod, only: get_tracer_names, get_number_tracers, get_tracer_index
 use field_manager_mod,  only: MODEL_ATMOS
 use atmos_model_mod, only: IPD_Data, IPD_Control, Atm_block
