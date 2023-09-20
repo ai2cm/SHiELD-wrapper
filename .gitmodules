@@ -1,0 +1,18 @@
+[submodule "submodules/SHiELD_build"]
+	path = submodules/SHiELD_build
+	url = https://github.com/NOAA-GFDL/SHiELD_build.git
+[submodule "submodules/SHiELD_SRC/FMS"]
+	path = submodules/SHiELD_SRC/FMS
+	url = https://github.com/NOAA-GFDL/FMS.git
+[submodule "submodules/SHiELD_SRC/FMSCoupler"]
+	path = submodules/SHiELD_SRC/FMSCoupler
+	url = https://github.com/NOAA-GFDL/FMSCoupler.git
+[submodule "submodules/SHiELD_SRC/GFDL_atmos_cubed_sphere"]
+	path = submodules/SHiELD_SRC/GFDL_atmos_cubed_sphere
+	url = https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git
+[submodule "submodules/SHiELD_SRC/SHiELD_physics"]
+	path = submodules/SHiELD_SRC/SHiELD_physics
+	url = https://github.com/NOAA-GFDL/SHiELD_physics.git
+[submodule "submodules/SHiELD_SRC/atmos_drivers"]
+	path = submodules/SHiELD_SRC/atmos_drivers
+	url = https://github.com/NOAA-GFDL/atmos_drivers.git
