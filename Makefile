@@ -20,3 +20,6 @@ enter:
 
 lock_pip:
 	pip-compile requirements.in
+
+update_submodules:
+	git submodule update --init --recursive
