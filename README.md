@@ -1,8 +1,8 @@
 # SHiELD-wrapper
 
 This repository contains code for a Python-wrapped version of the public
-version of GFDL's SHiELD model.  It aims to be a drop-in replacement for
-[AI2's existing Python-wrapped version of
+version of GFDL's SHiELD model.  It is based on [AI2's existing Python-wrapped
+version of
 FV3GFS](https://github.com/ai2cm/fv3gfs-fortran/tree/master/FV3/wrapper), which
 was described in [McGibbon et
 al. (2021)](https://gmd.copernicus.org/articles/14/4401/2021/gmd-14-4401-2021.html),

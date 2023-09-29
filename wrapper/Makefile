@@ -57,5 +57,4 @@ test:
 	pytest -vv tests/pytest
 
 test_regtest_reset:
-	pytest -vv tests/test_all_mpi_requiring.py
 	pytest -vv tests/pytest --regtest-reset
