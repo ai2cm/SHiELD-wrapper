@@ -8,7 +8,7 @@ CC ?= mpicc
 CXX ?= mpicxx
 LD ?= mpif90
 
-ARTIFACTS=$(SHIELD_BUILD)/Build/exec/shield_wrapper_nh.prod.64bit.gnu
+ARTIFACTS=$(SHIELD_BUILD)/Build/exec/shield_nh.prod.64bit.gnu
 FMS_64BIT=$(SHIELD_BUILD)/Build/libFMS/gnu/64bit
 FFLAGS += -I$(ARTIFACTS) -I$(FMS_64BIT)
 MPI_FLAGS=`$(FC) -show | sed 's/\(-I[^ ]*\|^[^ ]*\)//g'`

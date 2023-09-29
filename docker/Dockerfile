@@ -59,18 +59,18 @@ ENV SHiELD_LD=mpif90
 ENV SUBMODULE_DIR=/SHiELD
 COPY submodules ${SUBMODULE_DIR}/
 
-# Build FMS, NCEPlibs, and SHiELD using SHiELD_build
-# FMS_CPPDEFS needed to address https://github.com/NOAA-GFDL/FMS/issues/426 and
-# to build FMS with the -fPIC flag, which is required for the wrapper.
+# Build FMS, NCEPlibs, and SHiELD using SHiELD_build with position independent
+# code FMS_CPPDEFS is needed to address
+# https://github.com/NOAA-GFDL/FMS/issues/426
 RUN cd ${SUBMODULE_DIR}/SHiELD_build/Build && \
-    FMS_CPPDEFS="-DHAVE_GETTID -fPIC" \
+    FMS_CPPDEFS="-DHAVE_GETTID" \
     FC=${SHiELD_FC} \
     CC=${SHiELD_CC} \
     CXX=${SHiELD_CXX} \
     LD=${SHiELD_LD} \
     TEMPLATE=site/gnu.mk \
     AVX_LEVEL=-march=native \
-    ./COMPILE shield_wrapper 64bit gnu
+    ./COMPILE shield 64bit gnu pic
 
 COPY requirements.txt /tmp
 RUN \
@@ -92,7 +92,7 @@ RUN make -C wrapper \
     CXX=${SHiELD_CXX} \
     LD=${SHiELD_LD} \
     LDSHARED="${SHiELD_CC} -shared" \
-    FPIC=Y \
+    PIC=Y \
     OPENMP=Y \
     AVX=Y \
     build install
