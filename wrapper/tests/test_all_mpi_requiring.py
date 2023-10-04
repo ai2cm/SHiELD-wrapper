@@ -37,5 +37,8 @@ class UsingMPITests(unittest.TestCase):
     def test_flags(self):
         run_unittest_script("test_flags.py")
 
+    def test_wind_transformations(self):
+        run_unittest_script("test_wind_transformations.py")
+
 if __name__ == "__main__":
     unittest.main()
