@@ -225,16 +225,8 @@ cdef int set_2d_quantity(name, REAL_t[:, ::1] array) except -1:
     {% endif %}
 {% endfor %}
 {% for item in physics_2d_properties %}
-    {% if item.name in overriding_fluxes %}
-    elif name == '{{ item.name }}':
-        if flags.override_surface_radiative_fluxes:
-            set_{{ item.fortran_name }}{% if "fortran_subname" in item %}_{{ item.fortran_subname }}{% endif %}(&array[0, 0])
-        else:
-            raise pace.util.InvalidQuantityError('Overriding surface fluxes can only be set if gfs_physics_nml.override_surface_radiative_fluxes is set to .true.')
-    {% else %}
     elif name == '{{ item.name }}':
         set_{{ item.fortran_name }}{% if "fortran_subname" in item %}_{{ item.fortran_subname }}{% endif %}(&array[0, 0])
-    {% endif %}
 {% endfor %}
     else:
         raise ValueError(f'no setter available for {name}')
@@ -298,20 +290,10 @@ def get_state(names, dict state=None, allocator=None):
         state['initialization_time'] = get_time(which='initialization_time')
 
 {% for item in physics_2d_properties %}
-    {% if item.name in overriding_fluxes %}
-    if '{{ item.name }}' in input_names_set:
-        if flags.override_surface_radiative_fluxes:
-            quantity = _get_quantity(state, "{{ item.name }}", allocator, {{ item.dims | safe }}, "{{ item.units }}", dtype=real_type)
-            with pace.util.recv_buffer(quantity.np.empty, quantity.view[:]) as array_2d:
-                get_{{ item.fortran_name }}{% if "fortran_subname" in item %}_{{ item.fortran_subname }}{% endif %}(&array_2d[0, 0])
-        else:
-            raise pace.util.InvalidQuantityError('Overriding surface fluxes can only be accessed if gfs_physics_nml.override_surface_radiative_fluxes is set to .true.')
-    {% else %}
     if '{{ item.name }}' in input_names_set:
         quantity = _get_quantity(state, "{{ item.name }}", allocator, {{ item.dims | safe }}, "{{ item.units }}", dtype=real_type)
         with pace.util.recv_buffer(quantity.np.empty, quantity.view[:]) as array_2d:
             get_{{ item.fortran_name }}{% if "fortran_subname" in item %}_{{ item.fortran_subname }}{% endif %}(&array_2d[0, 0])
-    {% endif %}
 {% endfor %}
 
 {% for item in physics_3d_properties %}
