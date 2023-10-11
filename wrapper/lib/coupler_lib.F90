@@ -26,6 +26,7 @@ module coupler_lib
 
     use FMS
     use FMSconstants,    only: fmsconstants_init
+    use FV3GFS_io_mod,   only: Diag
     use atmos_model_mod, only: atmos_model_init, atmos_model_end,  &
                                update_atmos_model_dynamics,        &
                                update_atmos_radiation_physics,     &
@@ -589,5 +590,76 @@ module coupler_lib
     
     !#######################################################################
     
+       subroutine get_diagnostics_count(n) bind(c)
+          integer(c_int), intent(out) :: n
+          n = size(Diag)
+       end subroutine
+
+       subroutine f_to_c_string(c, f)
+          character(len=*) f
+          character(kind=c_char, len=1), dimension(:) :: c
+          ! local
+          character(kind=c_char, len=128) trimmed
+          integer i
+
+          trimmed = trim(f) // c_null_char
+
+          do i=1, size(c)
+            c(i) = trimmed(i:i)
+          end do
+       end subroutine
+
+       subroutine get_metadata_diagnostics(idx, axes, mod_name, name, desc, unit) bind(c)
+          integer(c_int), intent(in) :: idx
+          integer(c_int), intent(out) :: axes
+          character(kind=c_char, len=1), dimension(128), intent(out) :: mod_name, name, desc, unit
+
+          axes = Diag(idx)%axes
+          call f_to_c_string(mod_name, Diag(idx)%mod_name)
+          call f_to_c_string(name, Diag(idx)%name)
+          call f_to_c_string(desc, Diag(idx)%desc)
+          call f_to_c_string(unit, Diag(idx)%unit)
+       end subroutine
+
+       subroutine get_diagnostic_3d(idx, out) bind(c)
+          use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
+          use atmos_model_mod, only: Atm_block
+          integer(c_int), intent(in) :: idx
+          real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end(), nz()) :: out
+          ! locals
+          integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes, n
+          n = nz()
+          blocks_per_MPI_domain = Atm_block%nblks
+
+          do i_block = 1, blocks_per_MPI_domain ! blocks per MPI domain
+             do k=1, n
+                do i_column = 1, Atm_block%blksz(i_block) ! points per block
+                   i = Atm_block%index(i_block)%ii(i_column)
+                   j = Atm_block%index(i_block)%jj(i_column)
+                   out(i, j, n - k + 1) = Diag(idx)%data(i_block)%var3(i_column, k)
+                end do
+             enddo
+          enddo
+       end subroutine
+
+       subroutine get_diagnostic_2d(idx, out) bind(c)
+          use dynamics_data_mod, only: i_start, i_end, j_start, j_end
+          use atmos_model_mod, only: Atm_block
+          integer(c_int), intent(in) :: idx
+          real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end()) :: out
+          ! locals
+          integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes
+
+          blocks_per_MPI_domain = Atm_block%nblks
+          do i_block = 1, blocks_per_MPI_domain ! blocks per MPI domain
+             do i_column = 1, Atm_block%blksz(i_block) ! points per block
+                i = Atm_block%index(i_block)%ii(i_column)
+                j = Atm_block%index(i_block)%jj(i_column)
+                out(i, j) = Diag(idx)%data(i_block)%var2(i_column)
+             enddo
+          enddo
+       end subroutine
+
+
     end module coupler_lib
     
