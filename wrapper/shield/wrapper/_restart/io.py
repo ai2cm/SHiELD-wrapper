@@ -1,7 +1,8 @@
 from .._wrapper import get_tracer_metadata
 from .._properties import (
     DYNAMICS_PROPERTIES,
-    PHYSICS_PROPERTIES
+    OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES,
+    PHYSICS_PROPERTIES,
 )
 
 # these variables are found not to be needed for smooth restarts
@@ -10,7 +11,7 @@ RESTART_EXCLUDE_NAMES = [
     "convective_cloud_fraction",
     "convective_cloud_top_pressure",
     "convective_cloud_bottom_pressure",
-]
+] + OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES
 
 
 def get_restart_names():

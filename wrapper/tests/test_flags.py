@@ -55,6 +55,11 @@ class FlagsTest(unittest.TestCase):
         expected = 900
         self.assertEqual(result, expected)
 
+    def test_override_surface_radiative_fluxes(self):
+        """Test that getting a boolean flag produces its expected result."""
+        result = shield.wrapper.flags.override_surface_radiative_fluxes
+        self.assertFalse(result)
+
 
 if __name__ == "__main__":
     config = get_default_config()

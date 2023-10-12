@@ -6,6 +6,7 @@ import numpy as np
 import shield.wrapper
 from shield.wrapper._properties import (
     DYNAMICS_PROPERTIES,
+    OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES,
     PHYSICS_PROPERTIES
 )
 import pace.util
@@ -20,6 +21,10 @@ from util import (
 
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_PHYSICS_PROPERTIES = []
+for entry in PHYSICS_PROPERTIES:
+    if entry["name"] not in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
+        DEFAULT_PHYSICS_PROPERTIES.append(entry)
 
 
 class SetterTests(unittest.TestCase):
@@ -27,7 +32,10 @@ class SetterTests(unittest.TestCase):
         super(SetterTests, self).__init__(*args, **kwargs)
         self.tracer_data = shield.wrapper.get_tracer_metadata()
         self.dynamics_data = generate_data_dict(DYNAMICS_PROPERTIES)
-        self.physics_data = generate_data_dict(PHYSICS_PROPERTIES)
+        if shield.wrapper.flags.override_surface_radiative_fluxes:
+            self.physics_data = generate_data_dict(PHYSICS_PROPERTIES)
+        else:
+            self.physics_data = generate_data_dict(DEFAULT_PHYSICS_PROPERTIES)
 
     def setUp(self):
         pass
@@ -174,6 +182,21 @@ class SetterTests(unittest.TestCase):
     def assert_values_equal(self, quantity1, quantity2):
         self.assertTrue(quantity1.np.all(quantity1.view[:] == quantity2.view[:]))
 
+    def _set_unallocated_override_for_radiative_surface_flux(self, name):
+        config = get_current_config()
+        sizer = pace.util.SubtileGridSizer.from_namelist(config["namelist"])
+        factory = pace.util.QuantityFactory(sizer, np)
+        quantity = factory.zeros(["x", "y"], units="W/m**2")
+        with self.assertRaisesRegex(pace.util.InvalidQuantityError, "Overriding"):
+            shield.wrapper.set_state({name: quantity})
+
+    def test_set_unallocated_override_for_radiative_surface_flux(self):
+        if shield.wrapper.flags.override_surface_radiative_fluxes:
+            self.skipTest("Memory is allocated for the overriding fluxes in this case.")
+        for name in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
+            with self.subTest(name):
+                self._set_unallocated_override_for_radiative_surface_flux(name)
+
     def test_set_surface_precipitation_rate(self):
         """Special test since this quantity is not in physics_properties.json file"""
         state = shield.wrapper.get_state(
@@ -192,6 +215,28 @@ class SetterTests(unittest.TestCase):
         )
 
 
+def get_override_surface_radiative_fluxes():
+    """A crude way of parameterizing the setter tests for different values of
+    gfs_physics_nml.override_surface_radiative_fluxes.
+    See https://stackoverflow.com/questions/11380413/python-unittest-passing-arguments.
+    """
+    if len(sys.argv) != 2:
+        raise ValueError(
+            "test_setters.py requires a single argument "
+            "be passed through the command line, indicating the value of "
+            "the gfs_physics_nml.override_surface_radiative_fluxes flag "
+            "('true' or 'false')."
+        )
+    override_surface_radiative_fluxes = sys.argv.pop().lower()
+
+    # Convert string argument to bool.
+    return override_surface_radiative_fluxes == "true"
+
+
 if __name__ == "__main__":
     config = get_default_config()
+    override_surface_radiative_fluxes = get_override_surface_radiative_fluxes()
+    config["namelist"]["gfs_physics_nml"][
+        "override_surface_radiative_fluxes"
+    ] = override_surface_radiative_fluxes
     main(test_dir, config)
