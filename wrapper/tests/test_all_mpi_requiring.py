@@ -37,5 +37,8 @@ class UsingMPITests(unittest.TestCase):
     def test_flags(self):
         run_unittest_script("test_flags.py")
 
+    def test_set_ocean_surface_temperature(self):
+        run_unittest_script("test_set_ocean_surface_temperature.py")
+
 if __name__ == "__main__":
     unittest.main()
