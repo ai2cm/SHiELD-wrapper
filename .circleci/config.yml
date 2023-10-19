@@ -1,0 +1,28 @@
+version: 2.1
+orbs:
+  gcp-gcr: circleci/gcp-gcr@0.15.0
+  gh: circleci/github-cli@2.1.0
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202111-02
+    environment:
+      FSSPEC_GS_REQUESTER_PAYS: vcm-ml
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/key.json
+    steps:
+      - checkout
+      - run: make update_submodules
+      - run:
+          name: "gcloud auth"
+          command: |
+            echo $ENCODED_GOOGLE_CREDENTIALS | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+            echo "export GCLOUD_SERVICE_KEY=\$(echo \$ENCODED_GOOGLE_CREDENTIALS | base64 --decode)" >> $BASH_ENV
+      - gcp-gcr/gcr-auth
+      - run: make build
+      - run: make test
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build

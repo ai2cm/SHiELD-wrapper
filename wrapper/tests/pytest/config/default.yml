@@ -1,0 +1,471 @@
+data_table: default
+diag_table:
+  base_time: 2000-01-01 00:00:00
+  name: default
+  file_configs:
+  - field_configs:
+    - {module_name: dynamics, field_name: pk, output_name: pk}
+    - {module_name: dynamics, field_name: bk, output_name: bk}
+    - {module_name: dynamics, field_name: hyam, output_name: hyam}
+    - {module_name: dynamics, field_name: hybm, output_name: hybm}
+    - {module_name: dynamics, field_name: zsurf, output_name: HGTsfc}
+    name: atmos_static
+    frequency: -1
+    frequency_units: minutes
+    time_axis_name: time
+    time_axis_units: minutes
+  - field_configs:
+    - {module_name: dynamics, field_name: grid_lont, output_name: lon}
+    - {module_name: dynamics, field_name: grid_latt, output_name: lat}
+    - {module_name: dynamics, field_name: grid_lon, output_name: lonb}
+    - {module_name: dynamics, field_name: grid_lat, output_name: latb}
+    - {module_name: dynamics, field_name: area, output_name: area}
+    - {module_name: dynamics, field_name: us, output_name: UGRDlowest}
+    - {module_name: dynamics, field_name: u850, output_name: UGRD850}
+    - {module_name: dynamics, field_name: u500, output_name: UGRD500}
+    - {module_name: dynamics, field_name: u250, output_name: UGRD250}
+    - {module_name: dynamics, field_name: u50, output_name: UGRD50}
+    - {module_name: dynamics, field_name: vs, output_name: VGRDlowest}
+    - {module_name: dynamics, field_name: v850, output_name: VGRD850}
+    - {module_name: dynamics, field_name: v500, output_name: VGRD500}
+    - {module_name: dynamics, field_name: v200, output_name: VGRD200}
+    - {module_name: dynamics, field_name: v50, output_name: VGRD50}
+    - {module_name: dynamics, field_name: tb, output_name: TMPlowest}
+    - {module_name: dynamics, field_name: t850, output_name: TMP850}
+    - {module_name: dynamics, field_name: t500, output_name: TMP500}
+    - {module_name: dynamics, field_name: t200, output_name: TMP200}
+    - {module_name: dynamics, field_name: w850, output_name: VVEL850}
+    - {module_name: dynamics, field_name: w500, output_name: VVEL500}
+    - {module_name: dynamics, field_name: w200, output_name: VVEL200}
+    - {module_name: dynamics, field_name: w50, output_name: VVEL50}
+    - {module_name: dynamics, field_name: vort850, output_name: VORT850}
+    - {module_name: dynamics, field_name: vort500, output_name: VORT500}
+    - {module_name: dynamics, field_name: vort200, output_name: VORT200}
+    - {module_name: dynamics, field_name: dp1000, output_name: DPT1000}
+    - {module_name: dynamics, field_name: dp850, output_name: DPT850}
+    - {module_name: dynamics, field_name: dp500, output_name: DPT500}
+    - {module_name: dynamics, field_name: rh1000, output_name: RH1000}
+    - {module_name: dynamics, field_name: rh925, output_name: RH925}
+    - {module_name: dynamics, field_name: rh850, output_name: RH850}
+    - {module_name: dynamics, field_name: rh700, output_name: RH700}
+    - {module_name: dynamics, field_name: rh500, output_name: RH500}
+    - {module_name: dynamics, field_name: slp, output_name: PRMSL}
+    - {module_name: dynamics, field_name: ps, output_name: PRESsfc}
+    - {module_name: dynamics, field_name: tq, output_name: PWAT}
+    - {module_name: dynamics, field_name: lw, output_name: VIL}
+    - {module_name: dynamics, field_name: iw, output_name: iw}
+    - {module_name: dynamics, field_name: w100m, output_name: VVEL100m}
+    - {module_name: dynamics, field_name: w2500m, output_name: VVEL2500m}
+    - {module_name: dynamics, field_name: w5km, output_name: VVEL5km}
+    - {module_name: dynamics, field_name: max_reflectivity, output_name: REFC}
+    - {module_name: dynamics, field_name: base_reflectivity, output_name: REFD1km}
+    - {module_name: dynamics, field_name: echo_top, output_name: RETOP}
+    - {module_name: dynamics, field_name: ctt, output_name: TMPctp}
+    - {module_name: dynamics, field_name: ctp, output_name: PRESctp}
+    - {module_name: dynamics, field_name: ctz, output_name: HGTctp}
+    - {module_name: dynamics, field_name: z500, output_name: z500}
+    - {module_name: dynamics, field_name: cape, output_name: cape}
+    - {module_name: dynamics, field_name: ucomp, output_name: ucomp}
+    - {module_name: dynamics, field_name: vcomp, output_name: vcomp}
+    - {module_name: dynamics, field_name: temp, output_name: temp}
+    - {module_name: dynamics, field_name: delp, output_name: delp}
+    - {module_name: dynamics, field_name: sphum, output_name: sphum}
+    - {module_name: dynamics, field_name: pfnh, output_name: nhpres}
+    - {module_name: dynamics, field_name: w, output_name: w}
+    - {module_name: dynamics, field_name: delz, output_name: delz}
+    - {module_name: dynamics, field_name: ps, output_name: ps}
+    - {module_name: dynamics, field_name: reflectivity, output_name: reflectivity}
+    - {module_name: dynamics, field_name: liq_wat, output_name: liq_wat}
+    - {module_name: dynamics, field_name: ice_wat, output_name: ice_wat}
+    - {module_name: dynamics, field_name: rainwat, output_name: rainwat}
+    - {module_name: dynamics, field_name: snowwat, output_name: snowwat}
+    - {module_name: dynamics, field_name: graupel, output_name: graupel}
+    name: atmos_dt_atmos
+    frequency: 15
+    frequency_units: minutes
+    time_axis_name: time
+    time_axis_units: minutes
+  - field_configs:
+    - {module_name: dynamics, field_name: grid_lont, output_name: lon}
+    - {module_name: dynamics, field_name: grid_latt, output_name: lat}
+    - {module_name: dynamics, field_name: grid_lon, output_name: lonb}
+    - {module_name: dynamics, field_name: grid_lat, output_name: latb}
+    - {module_name: dynamics, field_name: area, output_name: area}
+    - {module_name: gfs_phys, field_name: cnvprcp_ave, output_name: CPRATsfc}
+    - {module_name: gfs_phys, field_name: totprcp_ave, output_name: PRATEsfc}
+    - {module_name: gfs_phys, field_name: totice_ave, output_name: ICEsfc}
+    - {module_name: gfs_phys, field_name: totsnw_ave, output_name: SNOWsfc}
+    - {module_name: gfs_phys, field_name: totgrp_ave, output_name: GRAUPELsfc}
+    - {module_name: gfs_phys, field_name: DSWRF, output_name: DSWRFsfc}
+    - {module_name: gfs_phys, field_name: USWRF, output_name: USWRFsfc}
+    - {module_name: gfs_phys, field_name: DSWRFtoa, output_name: DSWRFtoa}
+    - {module_name: gfs_phys, field_name: USWRFtoa, output_name: USWRFtoa}
+    - {module_name: gfs_phys, field_name: ULWRFtoa, output_name: ULWRFtoa}
+    - {module_name: gfs_phys, field_name: ULWRF, output_name: ULWRFsfc}
+    - {module_name: gfs_phys, field_name: DLWRF, output_name: DLWRFsfc}
+    - {module_name: gfs_phys, field_name: lhtfl_ave, output_name: LHTFLsfc}
+    - {module_name: gfs_phys, field_name: shtfl_ave, output_name: SHTFLsfc}
+    - {module_name: gfs_phys, field_name: hpbl, output_name: HPBLsfc}
+    - {module_name: gfs_sfc, field_name: fice, output_name: ICECsfc}
+    - {module_name: gfs_sfc, field_name: SLMSKsfc, output_name: SLMSKsfc}
+    - {module_name: gfs_phys, field_name: TCDC_aveclm, output_name: TCDCclm}
+    - {module_name: gfs_phys, field_name: TCDC_avehcl, output_name: TCDChcl}
+    - {module_name: gfs_phys, field_name: TCDC_avelcl, output_name: TCDClcl}
+    - {module_name: gfs_phys, field_name: TCDC_avemcl, output_name: TCDCmcl}
+    - {module_name: gfs_sfc, field_name: q2m, output_name: SPFH2m}
+    - {module_name: gfs_sfc, field_name: t2m, output_name: TMP2m}
+    - {module_name: gfs_sfc, field_name: tsfc, output_name: TMPsfc}
+    - {module_name: gfs_phys, field_name: dpt2m, output_name: DPT2m}
+    - {module_name: gfs_phys, field_name: u10m, output_name: UGRD10m}
+    - {module_name: gfs_phys, field_name: v10m, output_name: VGRD10m}
+    - {module_name: gfs_sfc, field_name: weasd, output_name: WEASDsfc}
+    - {module_name: gfs_sfc, field_name: snowd, output_name: SNODsfc}
+    - {module_name: gfs_phys, field_name: tmpmax2m, output_name: TMAX2m}
+    - {module_name: gfs_phys, field_name: wind10mmax, output_name: MAXWIND10m}
+    - {module_name: gfs_phys, field_name: soilm, output_name: SOILM}
+    - {module_name: gfs_sfc, field_name: SOILT1, output_name: SOILT1}
+    - {module_name: gfs_sfc, field_name: SOILT2, output_name: SOILT2}
+    - {module_name: gfs_sfc, field_name: SOILT3, output_name: SOILT3}
+    - {module_name: gfs_sfc, field_name: SOILT4, output_name: SOILT4}
+    name: sfc_dt_atmos
+    frequency: 0
+    frequency_units: minutes
+    time_axis_name: time
+    time_axis_units: minutes
+experiment_name: default
+field_table: gs://vcm-fv3config/config/field_table/TKE-EDMF/v1.1/field_table
+forcing: gs://vcm-ml-experiments/spencerc/2023-09-13-SHiELD-forcing-data
+initial_conditions: gs://vcm-fv3config/data/initial_conditions/gfs_c12_example/v1.0
+namelist:
+  fms_affinity_nml:
+    affinity: false
+    debug_affinity: true
+  amip_interp_nml:
+    data_set: reynolds_oi
+    date_out_of_range: climo
+    interp_oi_sst: true
+    no_anom_sst: false
+    use_ncep_ice: false
+    use_ncep_sst: true
+  atmos_model_nml:
+    blocksize: 24
+    chksum_debug: false
+    dycore_only: false
+    fdiag: 0.25
+    first_time_step: false
+  cloud_diagnosis_nml:
+    beta: 1.22
+    ccn_l: 300.0
+    ccn_o: 100.0
+    liq_ice_combine: true
+    qi0_max: 0.0002
+    ql0_max: 0.002
+    qmin: 1.0e-12
+    reiflag: 1
+    reimax: 150.0
+    reimin: 10.0
+    rewflag: 1
+    rewmax: 10.0
+    rewmin: 5.0
+  coupler_nml:
+    atmos_nthreads: 1
+    calendar: julian
+    current_date:
+    - 2016
+    - 8
+    - 1
+    - 0
+    - 0
+    - 0
+    days: 0
+    dt_atmos: 900
+    dt_ocean: 900
+    hours: 0
+    minutes: 30
+    months: 0
+    seconds: 0
+    use_hyper_thread: false
+  diag_manager_nml:
+    prepend_date: false
+  external_ic_nml:
+    checker_tr: false
+    filtered_terrain: true
+    gfs_dwinds: true
+    levp: 64
+    nt_checker: 0
+  fms_io_nml:
+    checksum_required: false
+    max_files_r: 100
+    max_files_w: 100
+  fms_nml:
+    clock_grain: ROUTINE
+    domains_stack_size: 3000000
+    print_memory_usage: false
+  fv_core_nml:
+    a_imp: 1.0
+    adjust_dry_mass: false
+    beta: 0.0
+    consv_am: false
+    consv_te: 1.0
+    d2_bg: 0.0
+    d2_bg_k1: 0.15
+    d2_bg_k2: 0.02
+    d4_bg: 0.15
+    d_con: 1.0
+    d_ext: 0.0
+    dddmp: 0.2
+    delt_max: 0.002
+    dnats: 1
+    do_vort_damp: true
+    dwind_2d: false
+    external_ic: true
+    fill: true
+    fv_debug: false
+    fv_sg_adj: 600
+    gfs_phil: false
+    grid_type: 0
+    hord_dp: -5
+    hord_mt: 5
+    hord_tm: 5
+    hord_tr: -5
+    hord_vt: 5
+    hydrostatic: false
+    io_layout:
+    - 1
+    - 1
+    k_split: 2
+    ke_bg: 0.0
+    kord_mt: 9
+    kord_tm: -9
+    kord_tr: 9
+    kord_wz: 9
+    layout:
+    - 1
+    - 1
+    make_nh: true
+    mountain: false
+    n_split: 6
+    n_sponge: 30
+    na_init: 1
+    ncep_ic: false
+    nggps_ic: true
+    no_dycore: false
+    nord: 3
+    npx: 13
+    npy: 13
+    npz: 63
+    ntiles: 6
+    nudge_qv: true
+    nwat: 6
+    p_fac: 0.1
+    phys_hydrostatic: false
+    print_freq: 6
+    range_warn: false
+    reset_eta: false
+    rf_cutoff: 750.0
+    rf_fast: false
+    tau: 5.0
+    use_hydro_pressure: false
+    vtdm4: 0.03
+    warm_start: false
+    z_tracer: true
+  gfdl_cloud_microphysics_nml:
+    c_cracw: 0.8
+    c_paut: 0.5
+    c_pgacs: 0.01
+    c_psaci: 0.05
+    ccn_l: 300.0
+    ccn_o: 100.0
+    const_vg: false
+    const_vi: false
+    const_vr: false
+    const_vs: false
+    de_ice: false
+    do_qa: true
+    do_sedi_heat: true
+    dw_land: 0.16
+    dw_ocean: 0.1
+    fast_sat_adj: false
+    fix_negative: false
+    mono_prof: false
+    mp_time: 150.0
+    prog_ccn: false
+    qi0_crt: 8.0e-05
+    qi_lim: 1.0
+    ql_gen: 0.001
+    ql_mlt: 0.001
+    qs0_crt: 0.001
+    rad_graupel: true
+    rad_rain: true
+    rad_snow: true
+    rh_inc: 0.3
+    rh_inr: 0.3
+    rh_ins: 0.3
+    rthresh: 1.0e-05
+    sedi_transport: true
+    tau_g2v: 900.0
+    tau_i2s: 1000.0
+    tau_l2v: 300.0
+    tau_v2l: 150.0
+    use_ccn: true
+    use_ppm: false
+    vg_fac: 1.0
+    vg_max: 12.0
+    vi_fac: 1.0
+    vi_max: 1.0
+    vr_fac: 1.0
+    vr_max: 12.0
+    vs_fac: 1.0
+    vs_max: 2.0
+    z_slope_ice: true
+    z_slope_liq: true
+  gfdl_mp_nml:
+    c_paut: 0.5
+    c_pgacs: 0.01
+    c_psaci: 0.05
+    ccn_l: 300.0
+    ccn_o: 100.0
+    const_vg: false
+    const_vi: false
+    const_vr: false
+    const_vs: false
+    do_qa: true
+    do_sedi_heat: true
+    dw_land: 0.16
+    dw_ocean: 0.1
+    fix_negative: false
+    icloud_f: 0
+    prog_ccn: false
+    qi0_crt: 8.0e-05
+    qi_lim: 1.0
+    ql_gen: 0.001
+    ql_mlt: 0.001
+    qs0_crt: 0.001
+    rad_graupel: true
+    rad_rain: true
+    rad_snow: true
+    rh_inc: 0.3
+    rh_inr: 0.3
+    rh_ins: 0.3
+    rthresh: 1.0e-05
+    tau_i2s: 1000.0
+    tau_l2v: 225.0
+    tau_v2l: 150.0
+    vg_fac: 1.0
+    vg_max: 12.0
+    vi_fac: 1.0
+    vi_max: 1.0
+    vr_fac: 1.0
+    vr_max: 12.0
+    vs_fac: 1.0
+    vs_max: 2.0
+    z_slope_ice: true
+    z_slope_liq: true
+  gfs_physics_nml:
+    cal_pre: false
+    cdmbgwd:
+    - 3.5
+    - 0.25
+    cloud_gfdl: false
+    cnvcld: false
+    cnvgwd: true
+    debug: false
+    do_deep: true
+    do_ocean: true
+    dspheat: true
+    fhcyc: 24.0
+    fhlwr: 3600.0
+    fhswr: 3600.0
+    fhzero: 0.25
+    hybedmf: false
+    iaer: 111
+    ialb: 1
+    ico2: 2
+    iems: 1
+    imfdeepcnv: 2
+    imfshalcnv: 2
+    isol: 2
+    isot: 1
+    isubc_lw: 2
+    isubc_sw: 2
+    ivegsrc: 1
+    ldiag3d: false
+    lwhtr: true
+    ncld: 5
+    nst_anl: true
+    pdfcld: false
+    pre_rad: false
+    prslrd0: 0.0
+    random_clds: false
+    redrag: true
+    shal_cnv: true
+    swhtr: true
+    trans_trac: true
+    use_ufo: true
+    xkzm_h: 0.001
+    xkzm_m: 0.001
+    xkzminv: 1.0
+    ysupbl: true
+    zhao_mic: false
+  integ_phys_nml:
+    do_inline_mp: false
+    do_sat_adj: false
+  interpolator_nml:
+    interp_method: conserve_great_circle
+  namsfc:
+    fabsl: 99999
+    faisl: 99999
+    faiss: 99999
+    fnabsc: grb/global_mxsnoalb.uariz.t1534.3072.1536.rg.grb
+    fnacna: ''
+    fnaisc: grb/CFSR.SEAICE.1982.2012.monthly.clim.grb
+    fnalbc: grb/global_snowfree_albedo.bosu.t1534.3072.1536.rg.grb
+    fnalbc2: grb/global_albedo4.1x1.grb
+    fnglac: grb/global_glacier.2x2.grb
+    fnmskh: grb/seaice_newland.grb
+    fnmxic: grb/global_maxice.2x2.grb
+    fnslpc: grb/global_slope.1x1.grb
+    fnsmcc: grb/global_soilmgldas.t1534.3072.1536.grb
+    fnsnoa: ''
+    fnsnoc: grb/global_snoclim.1.875.grb
+    fnsotc: grb/global_soiltype.statsgo.t1534.3072.1536.rg.grb
+    fntg3c: grb/global_tg3clim.2.6x1.5.grb
+    fntsfa: ''
+    fntsfc: grb/RTGSST.1982.2012.monthly.clim.grb
+    fnvegc: grb/global_vegfrac.0.144.decpercent.grb
+    fnvetc: grb/global_vegtype.igbp.t1534.3072.1536.rg.grb
+    fnvmnc: grb/global_shdmin.0.144x0.144.grb
+    fnvmxc: grb/global_shdmax.0.144x0.144.grb
+    fnzorc: igbp
+    fsicl: 99999
+    fsics: 99999
+    fslpl: 99999
+    fsmcl:
+    - 99999
+    - 99999
+    - 99999
+    fsnol: 99999
+    fsnos: 99999
+    fsotl: 99999
+    ftsfl: 99999
+    ftsfs: 90
+    fvetl: 99999
+    fvmnl: 99999
+    fvmxl: 99999
+    ldebug: false
+  ocean_nml:
+    do_mld_restore: true
+    end_lat: 30.0
+    eps_day: 10.0
+    gam: 0.2
+    mld_obs_ratio: 1.0
+    mld_option: obs
+    mld_restore_tscale: 2.0
+    ocean_option: MLM
+    restore_method: 2
+    sst_restore_tscale: 2.0
+    start_lat: -30.0
+    stress_ratio: 1.0
+    use_old_mlm: true
+    use_rain_flux: true
+orographic_forcing: gs://vcm-fv3config/data/orographic_data/v1.0
