@@ -34,7 +34,7 @@ class DiagnosticTests(unittest.TestCase):
             self.assertIsInstance(item.unit, str)
 
     def test_get_diagnostic_data(self):
-        names_to_get = ["dt3dt_1", "u10m"]
+        names_to_get = ["eta_shal", "u10m"]
         for name in names_to_get:
             quantity = shield.wrapper.get_diagnostic_by_name(
                 name, module_name="gfs_phys"
@@ -45,6 +45,12 @@ class DiagnosticTests(unittest.TestCase):
             self.assertIsInstance(quantity, pace.util.Quantity)
             assert quantity.view[:].ndim == info.axes
             assert quantity.units == info.unit
+            if name == "eta_shal":
+                assert quantity.view[:].ndim == 3
+            elif name == "u10m":
+                assert quantity.view[:].ndim == 2
+            else:
+                raise ValueError(f"Testing only implemented for eta_shal and u10m")
 
 
 if __name__ == "__main__":

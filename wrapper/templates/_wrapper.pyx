@@ -475,21 +475,21 @@ def cleanup():
 
 
 DiagnosticInfo = namedtuple(
-        'DiagnosticInfo', ['axes', 'module_name', 'name', 'description', 'unit'])
+    'DiagnosticInfo', 
+    ['axes', 'module_name', 'name', 'description', 'unit']
+)
 
 
 cdef _get_diagnostic_info_by_index(int i):
     cdef int ax
-    cdef int axes[1]
     cdef char name[128]
     cdef char mod_name[128]
     cdef char desc[128]
     cdef char unit[128]
 
-    get_metadata_diagnostics(&i, axes, &mod_name[0], &name[0], &desc[0], &unit[0])
-    ax = axes[0]
+    get_metadata_diagnostics(&i, &ax, &mod_name[0], &name[0], &desc[0], &unit[0])
     return DiagnosticInfo(
-        int(axes[0]),
+        ax,
         str(mod_name),
         str(name),
         str(desc),
