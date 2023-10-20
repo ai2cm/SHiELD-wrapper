@@ -50,7 +50,7 @@ class DiagnosticTests(unittest.TestCase):
             elif name == "u10m":
                 assert quantity.view[:].ndim == 2
             else:
-                raise ValueError(f"Testing only implemented for eta_shal and u10m")
+                raise ValueError("Testing only implemented for eta_shal and u10m")
 
 
 if __name__ == "__main__":
