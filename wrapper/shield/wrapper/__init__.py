@@ -1,5 +1,7 @@
 import pace.util
 from ._wrapper import (
+    _get_diagnostic_data,
+    _get_diagnostic_info,
     initialize,
     step,
     step_dynamics,
@@ -14,12 +16,41 @@ from ._wrapper import (
     get_tracer_metadata,
     compute_physics,
     apply_physics,
-    flags
+    flags,
+    DiagnosticInfo
 )
 from ._restart import get_restart_names, open_restart
 from . import examples
 
 from .thermodynamics import set_state_mass_conserving
+
+
+def get_diagnostic_by_name(
+    name: str, module_name: str = "gfs_phys"
+) -> pace.util.Quantity:
+    """Get a diagnostic field as a Quantity
+
+    Currently, only supports diagnostics defined in the FV3GFS_io.F90
+    """
+    info = _get_diagnostic_info()
+    for idx, meta in info.items():
+        if meta.module_name == module_name and meta.name == name:
+            return _get_diagnostic_data(idx)
+    raise ValueError(f"There is no diagnostic {name} in module {module_name}.")
+
+
+def get_diagnostic_metadata_by_name(
+    name: str, module_name: str = "gfs_phys"
+) -> DiagnosticInfo:
+    """Get diagnostic metadata by name
+
+    Currently, only supports diagnostics defined in the FV3GFS_io.F90
+    """
+    info = _get_diagnostic_info()
+    for idx, meta in info.items():
+        if meta.module_name == module_name and meta.name == name:
+            return meta
+    raise ValueError(f"There is no diagnostic {name} in module {module_name}.")
 
 
 __version__ = "0.1.0"

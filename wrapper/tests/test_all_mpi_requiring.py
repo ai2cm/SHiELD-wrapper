@@ -10,6 +10,9 @@ MPI.Finalize()
 
 
 class UsingMPITests(unittest.TestCase):
+    def test_diagnostics(self):
+        run_unittest_script("test_diagnostics.py")
+
     def test_getters(self):
         run_unittest_script("test_getters.py")
 
