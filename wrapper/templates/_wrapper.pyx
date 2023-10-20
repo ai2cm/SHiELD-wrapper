@@ -475,8 +475,7 @@ def cleanup():
 
 
 DiagnosticInfo = namedtuple(
-    'DiagnosticInfo', 
-    ['axes', 'module_name', 'name', 'description', 'unit']
+    "DiagnosticInfo", ["axes", "module_name", "name", "description", "unit"]
 )
 
 
