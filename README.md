@@ -9,10 +9,7 @@ al. (2021)](https://gmd.copernicus.org/articles/14/4401/2021/gmd-14-4401-2021.ht
 and used in several published hybrid machine learning projects.  Much of the
 code is identical or nearly identical to this original wrapper; the main
 difference is that the wrapper in this repository wraps the latest public
-version of GFDL's SHiELD model instead of an old fork of FV3GFS.  At this
-moment some features lag behind, because they require changes to the fortran
-code of SHiELD.  These features will be added incrementally as the required
-changes are made to SHiELD.
+version of GFDL's SHiELD model instead of an old fork of FV3GFS.
 
 ## Development
 
