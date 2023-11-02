@@ -43,5 +43,11 @@ class UsingMPITests(unittest.TestCase):
     def test_overrides_for_surface_radiative_fluxes_modify_diagnostics(self):
         run_unittest_script("test_overrides_for_surface_radiative_fluxes.py")
 
+    def test_set_ocean_surface_temperature(self):
+        run_unittest_script("test_set_ocean_surface_temperature.py")
+
+    def test_wind_transformations(self):
+        run_unittest_script("test_wind_transformations.py")
+
 if __name__ == "__main__":
     unittest.main()
