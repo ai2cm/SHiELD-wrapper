@@ -55,6 +55,7 @@ ENV SHiELD_FC=mpif90
 ENV SHiELD_CC=mpicc
 ENV SHiELD_CXX=mpicxx
 ENV SHiELD_LD=mpif90
+ENV SHiELD_AVX_LEVEL=-mavx
 
 ENV SUBMODULE_DIR=/SHiELD
 COPY submodules ${SUBMODULE_DIR}/
@@ -69,8 +70,8 @@ RUN cd ${SUBMODULE_DIR}/SHiELD_build/Build && \
     CXX=${SHiELD_CXX} \
     LD=${SHiELD_LD} \
     TEMPLATE=site/gnu.mk \
-    AVX_LEVEL=-march=native \
-    ./COMPILE shield 64bit gnu pic
+    AVX_LEVEL=${SHiELD_AVX_LEVEL} \
+    ./COMPILE shield repro 64bit gnu pic
 
 COPY requirements.txt /tmp
 RUN \
@@ -91,9 +92,11 @@ RUN make -C wrapper \
     CC=${SHiELD_CC} \
     CXX=${SHiELD_CXX} \
     LD=${SHiELD_LD} \
+    AVX_LEVEL=${SHiELD_AVX_LEVEL} \
     LDSHARED="${SHiELD_CC} -shared" \
     PIC=Y \
     OPENMP=Y \
     AVX=Y \
+    REPRO=Y \
     build install
 RUN python3 -c "import shield.wrapper"
