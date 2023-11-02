@@ -5,6 +5,7 @@ import shield.wrapper
 import pace.util
 from shield.wrapper._properties import (
     DYNAMICS_PROPERTIES,
+    OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES,
     PHYSICS_PROPERTIES,
 )
 from mpi4py import MPI
@@ -13,6 +14,10 @@ from util import get_current_config, get_default_config, generate_data_dict, mai
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 MM_PER_M = 1000
+DEFAULT_PHYSICS_PROPERTIES = []
+for entry in PHYSICS_PROPERTIES:
+    if entry["name"] not in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
+        DEFAULT_PHYSICS_PROPERTIES.append(entry)
 
 
 class GetterTests(unittest.TestCase):
@@ -20,7 +25,7 @@ class GetterTests(unittest.TestCase):
         super(GetterTests, self).__init__(*args, **kwargs)
         self.tracer_data = shield.wrapper.get_tracer_metadata()
         self.dynamics_data = generate_data_dict(DYNAMICS_PROPERTIES)
-        self.physics_data = generate_data_dict(PHYSICS_PROPERTIES)
+        self.physics_data = generate_data_dict(DEFAULT_PHYSICS_PROPERTIES)
         self.mpi_comm = MPI.COMM_WORLD
 
     def setUp(self):
@@ -152,6 +157,15 @@ class GetterTests(unittest.TestCase):
             with self.subTest(name):
                 self.assertIn(name, state)
         self.assertEqual(len(name_list), len(state.keys()))
+
+    def _get_unallocated_name_helper(self, name):
+        with self.assertRaisesRegex(pace.util.InvalidQuantityError, "Overriding"):
+            shield.wrapper.get_state(names=[name])
+
+    def test_unallocated_physics_properties(self):
+        for name in OVERRIDES_FOR_SURFACE_RADIATIVE_FLUXES:
+            with self.subTest(name):
+                self._get_unallocated_name_helper(name)
 
 class TracerMetadataTests(unittest.TestCase):
     def test_tracer_index_is_one_based(self):

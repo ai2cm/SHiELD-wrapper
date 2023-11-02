@@ -17,7 +17,10 @@ class UsingMPITests(unittest.TestCase):
         run_unittest_script("test_getters.py")
 
     def test_setters_default(self):
-        run_unittest_script("test_setters.py")
+        run_unittest_script("test_setters.py", "false")
+
+    def test_setters_while_overriding_surface_radiative_fluxes(self):
+        run_unittest_script("test_setters.py", "true")
 
     def test_tracer_metadata(self):
         run_unittest_script("test_tracer_metadata.py")
@@ -36,6 +39,15 @@ class UsingMPITests(unittest.TestCase):
 
     def test_flags(self):
         run_unittest_script("test_flags.py")
+
+    def test_overrides_for_surface_radiative_fluxes_modify_diagnostics(self):
+        run_unittest_script("test_overrides_for_surface_radiative_fluxes.py")
+
+    def test_set_ocean_surface_temperature(self):
+        run_unittest_script("test_set_ocean_surface_temperature.py")
+
+    def test_wind_transformations(self):
+        run_unittest_script("test_wind_transformations.py")
 
 if __name__ == "__main__":
     unittest.main()
