@@ -17,7 +17,9 @@ from ._wrapper import (
     compute_physics,
     apply_physics,
     flags,
-    DiagnosticInfo
+    DiagnosticInfo,
+    transform_agrid_winds_to_dgrid_winds,
+    transform_dgrid_winds_to_agrid_winds
 )
 from ._restart import get_restart_names, open_restart
 from . import examples
