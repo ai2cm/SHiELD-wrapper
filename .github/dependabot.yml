@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # Ensure updates are grouped into one PR in case interdependent changes
+      # are made upstream, which is not uncommon.
+      gfdl:
+        patterns:
+          - "submodules/SHiELD_SRC/*"
+          - "submodules/SHiELD_build"
