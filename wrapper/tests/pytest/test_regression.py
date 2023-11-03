@@ -11,7 +11,7 @@ from pathlib import Path
 
 TEST_DIR = Path(__file__).parent
 CONFIG_DIR = TEST_DIR / "config"
-EXECUTABLE = Path("/SHiELD/SHiELD_build/Build/bin/SHiELD_nh.prod.64bit.gnu.x")
+EXECUTABLE = Path("/SHiELD/SHiELD_build/Build/bin/SHiELD_nh.repro.64bit.gnu.x")
 
 
 def get_config(filename):
