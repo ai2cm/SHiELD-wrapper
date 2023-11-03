@@ -31,7 +31,12 @@ module coupler_lib
                                update_atmos_model_dynamics,        &
                                update_atmos_radiation_physics,     &
                                update_atmos_model_state,           &
-                               atmos_data_type, atmos_model_restart
+                               atmos_data_type,                    &
+                               atmos_model_restart,                &
+                               update_atmos_pre_radiation,         &
+                               update_atmos_radiation,             &
+                               update_atmos_physics
+    
     !--- FMS old io
 #ifdef use_deprecated_io
     use fms_io_mod, only: fms_io_exit!< This can't be removed until fms_io is not used at all
@@ -194,12 +199,20 @@ module coupler_lib
         Time_atmos = Time_atmos + Time_step_atmos
         call update_atmos_model_dynamics (Atm)
     end subroutine do_dynamics
+    
+  ! substepped physics
+    subroutine do_pre_radiation() bind(c)
+        call update_atmos_pre_radiation (Atm)
+    end subroutine do_pre_radiation
+
+    subroutine do_radiation() bind(c)
+        call update_atmos_radiation (Atm)
+    end subroutine do_radiation
 
     subroutine do_physics() bind(c)
-        call update_atmos_radiation_physics (Atm)
-        call update_atmos_model_state (Atm)
+        call update_atmos_physics (Atm)
     end subroutine do_physics
-    
+
     subroutine compute_physics_subroutine() bind(c)
         call update_atmos_radiation_physics (Atm)
     end subroutine compute_physics_subroutine

@@ -561,6 +561,28 @@ def _get_diagnostic_data(int idx):
     return pace.util.Quantity(array, dims, units=units)
 
 
+cdef extern:
+    void do_pre_radiation()
+    void do_radiation()
+    void do_physics()
+
+
+def step_pre_radiation():
+    """Do pre-radiation computations (e.g. time varying logic)"""
+    do_pre_radiation()
+
+
+def step_radiation():
+    """Compute Radiative transfer scheme"""
+    do_radiation()
+
+
+def step_post_radiation_physics():
+    """Compute Post-radiation physics (e.g. moist physics turbulence)"""
+    # TODO ensure that IPD_control.first_step is set in this routine
+    do_physics()
+
+
 def transform_agrid_winds_to_dgrid_winds(ua, va):
     """Transform A-grid lat-lon winds to D-grid cubed-sphere winds.
     This function wraps the cubed_a2d subroutine from the fortran model, making
