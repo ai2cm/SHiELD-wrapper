@@ -26,7 +26,7 @@ module coupler_lib
 
     use FMS
     use FMSconstants,    only: fmsconstants_init
-    use FV3GFS_io_mod,   only: Diag
+    use FV3GFS_io_mod,   only: gfdl_diag_type, Diag, Diag_diag_manager_controlled
     use atmos_model_mod, only: atmos_model_init, atmos_model_end,  &
                                update_atmos_model_dynamics,        &
                                update_atmos_radiation_physics,     &
@@ -602,10 +602,21 @@ module coupler_lib
        end subroutine coupler_end
     
     !#######################################################################
-    
-       subroutine get_diagnostics_count(n) bind(c)
+
+       subroutine get_diagnostics_count_from_diag_type(diag_type, n)
+          type(gfdl_diag_type), intent(in) :: diag_type(:)
+          integer, intent(inout) :: n
+          n = size(diag_type)
+       end subroutine
+
+       subroutine get_diagnostics_count(diag_manager_controlled, n) bind(c)
+          logical(c_int), intent(in) :: diag_manager_controlled
           integer(c_int), intent(out) :: n
-          n = size(Diag)
+          if (diag_manager_controlled) then
+             call get_diagnostics_count_from_diag_type(Diag_diag_manager_controlled, n)
+           else
+             call get_diagnostics_count_from_diag_type(Diag, n)
+           endif
        end subroutine
 
        subroutine f_to_c_string(c, f)
@@ -622,23 +633,38 @@ module coupler_lib
           end do
        end subroutine
 
-       subroutine get_metadata_diagnostics(idx, axes, mod_name, name, desc, unit) bind(c)
+       subroutine get_metadata_from_diag_type(diag_type, idx, axes, mod_name, name, desc, unit)
+          type(gfdl_diag_type), intent(in) :: diag_type(:)
+          integer, intent(in) :: idx
+          integer, intent(out) :: axes
+          character(len=1), dimension(128), intent(out) :: mod_name, name, desc, unit
+
+          axes = diag_type(idx)%axes
+          call f_to_c_string(mod_name, diag_type(idx)%mod_name)
+          call f_to_c_string(name, diag_type(idx)%name)
+          call f_to_c_string(desc, diag_type(idx)%desc)
+          call f_to_c_string(unit, diag_type(idx)%unit)
+       end subroutine
+
+       subroutine get_metadata_diagnostics(idx, diag_manager_controlled, axes, mod_name, name, desc, unit) bind(c)
           integer(c_int), intent(in) :: idx
+          logical(c_int), intent(in) :: diag_manager_controlled
           integer(c_int), intent(out) :: axes
           character(kind=c_char, len=1), dimension(128), intent(out) :: mod_name, name, desc, unit
 
-          axes = Diag(idx)%axes
-          call f_to_c_string(mod_name, Diag(idx)%mod_name)
-          call f_to_c_string(name, Diag(idx)%name)
-          call f_to_c_string(desc, Diag(idx)%desc)
-          call f_to_c_string(unit, Diag(idx)%unit)
+          if (diag_manager_controlled) then
+             call get_metadata_from_diag_type(Diag_diag_manager_controlled, idx, axes, mod_name, name, desc, unit)
+          else
+             call get_metadata_from_diag_type(Diag, idx, axes, mod_name, name, desc, unit)
+          endif
        end subroutine
 
-       subroutine get_diagnostic_3d(idx, out) bind(c)
+       subroutine get_diagnostic_3d_from_diag_type(diag_type, idx, out)
           use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
           use atmos_model_mod, only: Atm_block
-          integer(c_int), intent(in) :: idx
-          real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end(), nz()) :: out
+          type(gfdl_diag_type), intent(in) :: diag_type(:)
+          integer, intent(in) :: idx
+          real, intent(out), dimension(i_start():i_end(), j_start():j_end(), nz()) :: out
           ! locals
           integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes, n
           n = nz()
@@ -649,17 +675,18 @@ module coupler_lib
                 do i_column = 1, Atm_block%blksz(i_block) ! points per block
                    i = Atm_block%index(i_block)%ii(i_column)
                    j = Atm_block%index(i_block)%jj(i_column)
-                   out(i, j, n - k + 1) = Diag(idx)%data(i_block)%var3(i_column, k)
+                   out(i, j, n - k + 1) = diag_type(idx)%data(i_block)%var3(i_column, k)
                 end do
              enddo
           enddo
        end subroutine
 
-       subroutine get_diagnostic_2d(idx, out) bind(c)
+       subroutine get_diagnostic_2d_from_diag_type(diag_type, idx, out)
           use dynamics_data_mod, only: i_start, i_end, j_start, j_end
           use atmos_model_mod, only: Atm_block
-          integer(c_int), intent(in) :: idx
-          real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end()) :: out
+          type(gfdl_diag_type), intent(in) :: diag_type(:)
+          integer, intent(in) :: idx
+          real, intent(out), dimension(i_start():i_end(), j_start():j_end()) :: out
           ! locals
           integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes
 
@@ -668,11 +695,37 @@ module coupler_lib
              do i_column = 1, Atm_block%blksz(i_block) ! points per block
                 i = Atm_block%index(i_block)%ii(i_column)
                 j = Atm_block%index(i_block)%jj(i_column)
-                out(i, j) = Diag(idx)%data(i_block)%var2(i_column)
+                out(i, j) = diag_type(idx)%data(i_block)%var2(i_column)
              enddo
           enddo
        end subroutine
 
+       subroutine get_diagnostic_3d(idx, diag_manager_controlled, out) bind(c)
+          use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
+          use atmos_model_mod, only: Atm_block
+          integer(c_int), intent(in) :: idx
+          logical(c_int), intent(in) :: diag_manager_controlled
+          real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end(), nz()) :: out
+          ! locals
+          integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes, n
+
+          if (diag_manager_controlled) then
+             call get_diagnostic_3d_from_diag_type(Diag_diag_manager_controlled, idx, out)
+          else
+             call get_diagnostic_3d_from_diag_type(Diag, idx, out)
+          endif
+       end subroutine
+
+       subroutine get_diagnostic_2d(idx, diag_manager_controlled, out) bind(c)
+         use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
+          integer(c_int), intent(in) :: idx
+          logical(c_int), intent(in) :: diag_manager_controlled
+          real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end()) :: out
+          if (diag_manager_controlled) then
+             call get_diagnostic_2d_from_diag_type(Diag_diag_manager_controlled, idx, out)
+          else
+             call get_diagnostic_2d_from_diag_type(Diag, idx, out)
+          endif
+        end subroutine
 
     end module coupler_lib
-    
