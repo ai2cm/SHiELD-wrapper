@@ -38,7 +38,7 @@ def get_diagnostic_by_name(
     Currently, only supports diagnostics defined in the FV3GFS_io.F90
     """
     metadata = get_diagnostic_metadata_by_name(name, module_name)
-    return _get_diagnostic_data(metadata.index, metadata.diag_manager_controlled)
+    return _get_diagnostic_data(metadata.diag_manager_controlled, metadata.index)
 
 
 def get_diagnostic_metadata_by_name(

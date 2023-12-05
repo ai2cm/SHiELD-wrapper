@@ -646,9 +646,9 @@ module coupler_lib
           call f_to_c_string(unit, diag_type(idx)%unit)
        end subroutine
 
-       subroutine get_metadata_diagnostics(idx, diag_manager_controlled, axes, mod_name, name, desc, unit) bind(c)
-          integer(c_int), intent(in) :: idx
+       subroutine get_metadata_diagnostics(diag_manager_controlled, idx, axes, mod_name, name, desc, unit) bind(c)
           logical(c_int), intent(in) :: diag_manager_controlled
+          integer(c_int), intent(in) :: idx
           integer(c_int), intent(out) :: axes
           character(kind=c_char, len=1), dimension(128), intent(out) :: mod_name, name, desc, unit
 
@@ -700,11 +700,11 @@ module coupler_lib
           enddo
        end subroutine
 
-       subroutine get_diagnostic_3d(idx, diag_manager_controlled, out) bind(c)
+       subroutine get_diagnostic_3d(diag_manager_controlled, idx, out) bind(c)
           use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
           use atmos_model_mod, only: Atm_block
-          integer(c_int), intent(in) :: idx
           logical(c_int), intent(in) :: diag_manager_controlled
+          integer(c_int), intent(in) :: idx
           real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end(), nz()) :: out
           ! locals
           integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes, n
@@ -716,10 +716,10 @@ module coupler_lib
           endif
        end subroutine
 
-       subroutine get_diagnostic_2d(idx, diag_manager_controlled, out) bind(c)
+       subroutine get_diagnostic_2d(diag_manager_controlled, idx, out) bind(c)
          use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
-          integer(c_int), intent(in) :: idx
           logical(c_int), intent(in) :: diag_manager_controlled
+          integer(c_int), intent(in) :: idx
           real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end()) :: out
           if (diag_manager_controlled) then
              call get_diagnostic_2d_from_diag_type(Diag_diag_manager_controlled, idx, out)
