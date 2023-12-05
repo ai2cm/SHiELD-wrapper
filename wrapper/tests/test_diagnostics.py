@@ -23,7 +23,7 @@ class DiagnosticTests(unittest.TestCase):
     def test_get_diag_info(self):
         output = shield.wrapper._get_diagnostic_info()
         assert len(output) > 0
-        for key, item in output.items():
+        for item in output.values():
             self.assertIsInstance(item.axes, int)
             self.assertIsInstance(item.module_name, str)
 
@@ -50,7 +50,7 @@ class DiagnosticTests(unittest.TestCase):
             elif name == "u10m":
                 assert quantity.view[:].ndim == 2
             else:
-                raise ValueError(f"Testing only implemented for {names_to_get}.")
+                raise ValueError(f"Testing not implemented for getting {name!r}.")
 
 
 if __name__ == "__main__":
