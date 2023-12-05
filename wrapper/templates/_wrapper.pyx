@@ -495,7 +495,16 @@ def cleanup():
 
 
 DiagnosticInfo = namedtuple(
-    "DiagnosticInfo", ["index", "diag_manager_controlled", "axes", "module_name", "name", "description", "unit"]
+    "DiagnosticInfo",
+    [
+        "index",
+        "diag_manager_controlled",
+        "axes",
+        "module_name",
+        "name",
+        "description",
+        "unit"
+    ]
 )
 
 
@@ -506,7 +515,15 @@ cdef _get_diagnostic_info_by_index(int i, bint diag_manager_controlled):
     cdef char desc[128]
     cdef char unit[128]
 
-    get_metadata_diagnostics(&i, &diag_manager_controlled, &ax, &mod_name[0], &name[0], &desc[0], &unit[0])
+    get_metadata_diagnostics(
+        &i,
+        &diag_manager_controlled,
+        &ax,
+        &mod_name[0],
+        &name[0],
+        &desc[0],
+        &unit[0]
+    )
     return DiagnosticInfo(
         i,
         diag_manager_controlled,
@@ -538,8 +555,12 @@ def _get_diagnostic_info_by_type(bint diag_manager_controlled=False):
 
 
 def _get_diagnostic_info():
-    not_diag_manager_controlled = _get_diagnostic_info_by_type(diag_manager_controlled=False)
-    diag_manager_controlled = _get_diagnostic_info_by_type(diag_manager_controlled=True)
+    not_diag_manager_controlled = _get_diagnostic_info_by_type(
+        diag_manager_controlled=False
+    )
+    diag_manager_controlled = _get_diagnostic_info_by_type(
+        diag_manager_controlled=True
+    )
     return {**not_diag_manager_controlled, **diag_manager_controlled}
 
 
