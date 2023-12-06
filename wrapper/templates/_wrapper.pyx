@@ -497,7 +497,7 @@ def cleanup():
 DiagnosticInfo = namedtuple(
     "DiagnosticInfo",
     [
-        "diag_manager_controlled",
+        "is_diag_manager_controlled",
         "index",
         "axes",
         "module_name",
@@ -508,7 +508,7 @@ DiagnosticInfo = namedtuple(
 )
 
 
-cdef _get_diagnostic_info_by_index(bint diag_manager_controlled, int i):
+cdef _get_diagnostic_info_by_index(bint is_diag_manager_controlled, int i):
     cdef int ax
     cdef char name[128]
     cdef char mod_name[128]
@@ -516,7 +516,7 @@ cdef _get_diagnostic_info_by_index(bint diag_manager_controlled, int i):
     cdef char unit[128]
 
     get_metadata_diagnostics(
-        &diag_manager_controlled,
+        &is_diag_manager_controlled,
         &i,
         &ax,
         &mod_name[0],
@@ -525,7 +525,7 @@ cdef _get_diagnostic_info_by_index(bint diag_manager_controlled, int i):
         &unit[0]
     )
     return DiagnosticInfo(
-        diag_manager_controlled,
+        is_diag_manager_controlled,
         i,
         ax,
         str(mod_name),
@@ -535,14 +535,14 @@ cdef _get_diagnostic_info_by_index(bint diag_manager_controlled, int i):
     )
 
 
-def _get_diagnostic_info_by_type(bint diag_manager_controlled=False):
+def _get_diagnostic_info_by_type(bint is_diag_manager_controlled=False):
     cdef int n
-    get_diagnostics_count(&diag_manager_controlled, &n)
+    get_diagnostics_count(&is_diag_manager_controlled, &n)
 
     output = {}
     for i in range(n):
         try:
-            info = _get_diagnostic_info_by_index(diag_manager_controlled, i)
+            info = _get_diagnostic_info_by_index(is_diag_manager_controlled, i)
         except UnicodeDecodeError:
             # ignore errors when the names for a given array are not properly
             # initialized, resulting non-unicode string
@@ -556,21 +556,21 @@ def _get_diagnostic_info_by_type(bint diag_manager_controlled=False):
 
 def _get_diagnostic_info():
     not_diag_manager_controlled = _get_diagnostic_info_by_type(
-        diag_manager_controlled=False
+        is_diag_manager_controlled=False
     )
     diag_manager_controlled = _get_diagnostic_info_by_type(
-        diag_manager_controlled=True
+        is_diag_manager_controlled=True
     )
     return {**not_diag_manager_controlled, **diag_manager_controlled}
 
 
-def _get_diagnostic_data(bint diag_manager_controlled, int idx):
+def _get_diagnostic_data(bint is_diag_manager_controlled, int idx):
 
     cdef int nz
     cdef double[:, :] buf_2d
     cdef double[:, :, :] buf_3d
 
-    info = _get_diagnostic_info_by_index(diag_manager_controlled, idx)
+    info = _get_diagnostic_info_by_index(is_diag_manager_controlled, idx)
     ndim = info.axes
     units = info.unit
     shape = get_dimension_lengths()
@@ -579,12 +579,12 @@ def _get_diagnostic_data(bint diag_manager_controlled, int idx):
     if ndim == 3:
         array = np.empty((shape['nz'], shape['ny'], shape['nx']), dtype=dtype)
         buf_3d = array
-        get_diagnostic_3d(&diag_manager_controlled, &idx, &buf_3d[0, 0, 0])
+        get_diagnostic_3d(&is_diag_manager_controlled, &idx, &buf_3d[0, 0, 0])
         dims = [pace.util.Z_DIM, pace.util.Y_DIM, pace.util.X_DIM]
     elif ndim == 2:
         array = np.empty((shape['ny'], shape['nx']), dtype=dtype)
         buf_2d = array
-        get_diagnostic_2d(&diag_manager_controlled, &idx, &buf_2d[0, 0])
+        get_diagnostic_2d(&is_diag_manager_controlled, &idx, &buf_2d[0, 0])
         dims = [pace.util.Y_DIM, pace.util.X_DIM]
 
 

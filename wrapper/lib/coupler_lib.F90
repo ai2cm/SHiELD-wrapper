@@ -609,10 +609,10 @@ module coupler_lib
           n = size(diag_type)
        end subroutine
 
-       subroutine get_diagnostics_count(diag_manager_controlled, n) bind(c)
-          logical(c_int), intent(in) :: diag_manager_controlled
+       subroutine get_diagnostics_count(is_diag_manager_controlled, n) bind(c)
+          logical(c_int), intent(in) :: is_diag_manager_controlled
           integer(c_int), intent(out) :: n
-          if (diag_manager_controlled) then
+          if (is_diag_manager_controlled) then
              call get_diagnostics_count_from_diag_type(Diag_diag_manager_controlled, n)
            else
              call get_diagnostics_count_from_diag_type(Diag, n)
@@ -646,13 +646,13 @@ module coupler_lib
           call f_to_c_string(unit, diag_type(idx)%unit)
        end subroutine
 
-       subroutine get_metadata_diagnostics(diag_manager_controlled, idx, axes, mod_name, name, desc, unit) bind(c)
-          logical(c_int), intent(in) :: diag_manager_controlled
+       subroutine get_metadata_diagnostics(is_diag_manager_controlled, idx, axes, mod_name, name, desc, unit) bind(c)
+          logical(c_int), intent(in) :: is_diag_manager_controlled
           integer(c_int), intent(in) :: idx
           integer(c_int), intent(out) :: axes
           character(kind=c_char, len=1), dimension(128), intent(out) :: mod_name, name, desc, unit
 
-          if (diag_manager_controlled) then
+          if (is_diag_manager_controlled) then
              call get_metadata_from_diag_type(Diag_diag_manager_controlled, idx, axes, mod_name, name, desc, unit)
           else
              call get_metadata_from_diag_type(Diag, idx, axes, mod_name, name, desc, unit)
@@ -700,28 +700,28 @@ module coupler_lib
           enddo
        end subroutine
 
-       subroutine get_diagnostic_3d(diag_manager_controlled, idx, out) bind(c)
+       subroutine get_diagnostic_3d(is_diag_manager_controlled, idx, out) bind(c)
           use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
           use atmos_model_mod, only: Atm_block
-          logical(c_int), intent(in) :: diag_manager_controlled
+          logical(c_int), intent(in) :: is_diag_manager_controlled
           integer(c_int), intent(in) :: idx
           real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end(), nz()) :: out
           ! locals
           integer :: blocks_per_MPI_domain, i, j, k, i_block, i_column, axes, n
 
-          if (diag_manager_controlled) then
+          if (is_diag_manager_controlled) then
              call get_diagnostic_3d_from_diag_type(Diag_diag_manager_controlled, idx, out)
           else
              call get_diagnostic_3d_from_diag_type(Diag, idx, out)
           endif
        end subroutine
 
-       subroutine get_diagnostic_2d(diag_manager_controlled, idx, out) bind(c)
+       subroutine get_diagnostic_2d(is_diag_manager_controlled, idx, out) bind(c)
          use dynamics_data_mod, only: i_start, i_end, j_start, j_end, nz
-          logical(c_int), intent(in) :: diag_manager_controlled
+          logical(c_int), intent(in) :: is_diag_manager_controlled
           integer(c_int), intent(in) :: idx
           real(c_double), intent(out), dimension(i_start():i_end(), j_start():j_end()) :: out
-          if (diag_manager_controlled) then
+          if (is_diag_manager_controlled) then
              call get_diagnostic_2d_from_diag_type(Diag_diag_manager_controlled, idx, out)
           else
              call get_diagnostic_2d_from_diag_type(Diag, idx, out)

@@ -24,6 +24,9 @@ class DiagnosticTests(unittest.TestCase):
         output = shield.wrapper._get_diagnostic_info()
         assert len(output) > 0
         for item in output.values():
+            self.assertIsInstance(item.is_diag_manager_controlled, bool)
+            self.assertIsInstance(item.index, int)
+
             self.assertIsInstance(item.axes, int)
             self.assertIsInstance(item.module_name, str)
 
