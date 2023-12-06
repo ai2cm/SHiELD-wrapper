@@ -37,11 +37,8 @@ def get_diagnostic_by_name(
 
     Currently, only supports diagnostics defined in the FV3GFS_io.F90
     """
-    info = _get_diagnostic_info()
-    for idx, meta in info.items():
-        if meta.module_name == module_name and meta.name == name:
-            return _get_diagnostic_data(idx)
-    raise ValueError(f"There is no diagnostic {name} in module {module_name}.")
+    metadata = get_diagnostic_metadata_by_name(name, module_name)
+    return _get_diagnostic_data(metadata.is_diag_manager_controlled, metadata.index)
 
 
 def get_diagnostic_metadata_by_name(
@@ -52,10 +49,12 @@ def get_diagnostic_metadata_by_name(
     Currently, only supports diagnostics defined in the FV3GFS_io.F90
     """
     info = _get_diagnostic_info()
-    for idx, meta in info.items():
-        if meta.module_name == module_name and meta.name == name:
-            return meta
-    raise ValueError(f"There is no diagnostic {name} in module {module_name}.")
+
+    key = module_name, name
+    if key in info:
+        return info[key]
+    else:
+        raise ValueError(f"There is no diagnostic {name} in module {module_name}.")
 
 
 __version__ = "0.1.0"

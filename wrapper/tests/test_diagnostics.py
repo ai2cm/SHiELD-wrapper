@@ -23,7 +23,10 @@ class DiagnosticTests(unittest.TestCase):
     def test_get_diag_info(self):
         output = shield.wrapper._get_diagnostic_info()
         assert len(output) > 0
-        for index, item in output.items():
+        for item in output.values():
+            self.assertIsInstance(item.is_diag_manager_controlled, bool)
+            self.assertIsInstance(item.index, int)
+
             self.assertIsInstance(item.axes, int)
             self.assertIsInstance(item.module_name, str)
 
@@ -34,7 +37,7 @@ class DiagnosticTests(unittest.TestCase):
             self.assertIsInstance(item.unit, str)
 
     def test_get_diagnostic_data(self):
-        names_to_get = ["eta_shal", "u10m"]
+        names_to_get = ["eta_shal", "u10m", "tendency_of_specific_humidity_due_to_microphysics"]
         for name in names_to_get:
             quantity = shield.wrapper.get_diagnostic_by_name(
                 name, module_name="gfs_phys"
@@ -45,12 +48,12 @@ class DiagnosticTests(unittest.TestCase):
             self.assertIsInstance(quantity, pace.util.Quantity)
             assert quantity.view[:].ndim == info.axes
             assert quantity.units == info.unit
-            if name == "eta_shal":
+            if name == "eta_shal" or name == "tendency_of_specific_humidity_due_to_microphysics":
                 assert quantity.view[:].ndim == 3
             elif name == "u10m":
                 assert quantity.view[:].ndim == 2
             else:
-                raise ValueError("Testing only implemented for eta_shal and u10m")
+                raise ValueError(f"Testing not implemented for getting {name!r}.")
 
 
 if __name__ == "__main__":
