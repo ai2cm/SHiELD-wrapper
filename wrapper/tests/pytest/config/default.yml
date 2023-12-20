@@ -134,6 +134,9 @@ diag_table:
     time_axis_units: minutes
   - field_configs:
     - {module_name: gfs_phys, field_name: vertically_integrated_tendency_of_air_temperature_due_to_longwave_heating, output_name: vertically_integrated_tendency_of_air_temperature_due_to_longwave_heating}
+    - {module_name: gfs_sfc, field_name: ocean_fraction, output_name: ocean_fraction}
+    - {module_name: gfs_sfc, field_name: land_fraction, output_name: land_fraction}
+    - {module_name: gfs_sfc, field_name: sea_ice_fraction, output_name: sea_ice_fraction}
     name: sfc_dt_atmos_diagnostics_manager_controlled
     frequency: 15
     frequency_units: minutes
