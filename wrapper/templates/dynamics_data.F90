@@ -176,7 +176,7 @@ contains
         real, allocatable, dimension(:,:,:) :: ua_halo, va_halo, u_halo, v_halo
 
         type(group_halo_update_type), save :: i_pack
-        integer :: is, ie, js, je, isd, ied, jsd, jed, npx, npy, npz, mode
+        integer :: is, ie, js, je, isd, ied, jsd, jed, npx, npy, npz, mode, c2l_ord
 
         is = i_start()
         ie = i_end()
@@ -190,6 +190,7 @@ contains
         npy = Atm(mygrid)%npy
         npz = nz()
         mode = 1
+        c2l_ord = 4  ! Recommended default
 
         allocate(ua_halo(isd:ied,jsd:jed,1:npz))
         allocate(va_halo(isd:ied,jsd:jed,1:npz))
@@ -214,7 +215,7 @@ contains
             Atm(mygrid)%gridstruct%grid_type, &
             Atm(mygrid)%domain, &
             Atm(mygrid)%gridstruct%nested, &
-            Atm(mygrid)%flagstruct%c2l_ord, &
+            c2l_ord, &
             Atm(mygrid)%bd &
         )
 
