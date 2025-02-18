@@ -35,6 +35,7 @@ RUN apt-get update && \
     libmpich-dev \
     libnetcdf-dev \
     libnetcdff-dev \
+    libyaml-dev \
     m4 \
     make \
     mpich \
