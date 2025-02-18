@@ -302,7 +302,6 @@ namelist:
     prog_ccn: false
     qi0_crt: 8.0e-05
     qi_lim: 1.0
-    ql_gen: 0.001
     ql_mlt: 0.001
     qs0_crt: 0.001
     rad_graupel: true
@@ -310,7 +309,6 @@ namelist:
     rad_snow: true
     rh_inc: 0.3
     rh_inr: 0.3
-    rh_ins: 0.3
     rthresh: 1.0e-05
     sedi_transport: true
     tau_g2v: 900.0
