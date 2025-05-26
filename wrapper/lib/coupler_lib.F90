@@ -351,7 +351,7 @@ module coupler_lib
     !----- read namelist -------
     !----- for backwards compatibilty read from file coupler.nml -----
        read(fms_mpp_input_nml_file, nml=coupler_nml, iostat=io)
-       ierr = check_nml_error(io, 'coupler_nml')
+       ierr = fms_check_nml_error(io, 'coupler_nml')
     
     !----- write namelist to logfile -----
        call fms_write_version_number (version, tag)
