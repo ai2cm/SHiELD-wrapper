@@ -16,3 +16,15 @@
 [submodule "submodules/SHiELD_SRC/atmos_drivers"]
 	path = submodules/SHiELD_SRC/atmos_drivers
 	url = https://github.com/NOAA-GFDL/atmos_drivers.git
+[submodule "submodules/SHiELD_SRC/ocean_null"]
+	path = submodules/SHiELD_SRC/ocean_null
+	url = https://github.com/NOAA-GFDL/ocean_null.git
+[submodule "submodules/SHiELD_SRC/land_null"]
+	path = submodules/SHiELD_SRC/land_null
+	url = https://github.com/NOAA-GFDL/land_null.git
+[submodule "submodules/SHiELD_SRC/ice_null"]
+	path = submodules/SHiELD_SRC/ice_null
+	url = https://github.com/NOAA-GFDL/ice_null.git
+[submodule "submodules/SHiELD_SRC/ice_param"]
+	path = submodules/SHiELD_SRC/ice_param
+	url = https://github.com/NOAA-GFDL/ice_param.git
